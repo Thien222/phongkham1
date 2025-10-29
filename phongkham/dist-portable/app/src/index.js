@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import patientsRouter from './routes/patients.js';
 import refractionsRouter from './routes/refractions.js';
@@ -46,13 +47,17 @@ app.use('/api/backup', backupRouter);
 app.use('/api/settings', settingsRouter);
 
 // Serve static files from client build
+// Check if running from portable package or development
 const clientDistPath = path.join(__dirname, '../../client/dist');
-app.use(express.static(clientDistPath));
+const portableClientPath = path.join(__dirname, '../client-dist');
+const finalClientPath = fs.existsSync(portableClientPath) ? portableClientPath : clientDistPath;
+
+app.use(express.static(finalClientPath));
 
 // SPA fallback - serve index.html for all non-API routes
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(clientDistPath, 'index.html'));
+    res.sendFile(path.join(finalClientPath, 'index.html'));
   } else {
     res.status(404).json({ ok: false, message: 'API endpoint not found' });
   }
