@@ -12,6 +12,24 @@ echo Dang khoi dong server...
 echo.
 
 cd /d "%~dp0"
+
+REM Set absolute database path
+set "DB_PATH=%~dp0data\dev.db"
+set "DATABASE_URL=file:%DB_PATH%"
+
+REM Ensure data folder exists
+if not exist "data" mkdir data
+
+REM Copy default database if not exists
+if not exist "%DB_PATH%" (
+    echo.
+    echo Creating default database...
+    cd app
+    "..\nodejs\node.exe" "node_modules\prisma\build\index.js" db push
+    "..\nodejs\node.exe" src\scripts\seed.js
+    cd ..
+)
+
 cd app
 
 echo Checking Prisma Client...
@@ -25,6 +43,7 @@ if errorlevel 1 (
 
 echo.
 echo Starting server...
+echo Database: %DB_PATH%
 echo.
 echo ========================================
 echo.
