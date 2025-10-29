@@ -1,0 +1,148 @@
+// SQLite datasource - bundled file DB suitable for single-site server
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Patient information
+model Patient {
+  id           String        @id @default(cuid())
+  code         String        @unique
+  fullName     String
+  phone        String?
+  gender       String?
+  birthDate    DateTime?
+  address      String?
+  visitPurpose String        @default("both") // examination | refraction | both
+  visitStatus  String        @default("waiting") // waiting | in_progress | completed
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  refractions  Refraction[]
+  examinations Examination[]
+  invoices     Invoice[]
+}
+
+// Refraction examination results
+model Refraction {
+  id        String   @id @default(cuid())
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patientId String
+  // Right eye (OD - Oculus Dexter)
+  odSph     String?
+  odCyl     String?
+  odAxis    String?
+  odVa      String? // Visual Acuity
+  // Left eye (OS - Oculus Sinister)
+  osSph     String?
+  osCyl     String?
+  osAxis    String?
+  osVa      String?
+  // Examination date and notes
+  examDate  DateTime @default(now())
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Medical examination (doctor's diagnosis)
+model Examination {
+  id          String   @id @default(cuid())
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patientId   String
+  symptoms    String?  // Triệu chứng
+  diagnosis   String?  // Chẩn đoán
+  treatment   String?  // Điều trị
+  medications String?  // Thuốc kê đơn
+  examDate    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Product (glasses, lenses, medicines)
+model Product {
+  id          String        @id @default(cuid())
+  code        String        @unique
+  name        String
+  category    String        @default("glasses") // glasses | lenses | medicine
+  manufacturer String?
+  sphRange    String?       // Spherical range
+  cylRange    String?       // Cylinder range
+  material    String?       // Material (AS, CR, etc.)
+  price       Int           @default(0)
+  quantity    Int           @default(0)
+  minStock    Int           @default(5)
+  expiresAt   DateTime?
+  imageUrl    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  items       InvoiceItem[]
+}
+
+// Invoice
+model Invoice {
+  id             String        @id @default(cuid())
+  code           String        @unique
+  patient        Patient       @relation(fields: [patientId], references: [id])
+  patientId      String
+  type           String        @default("glasses") // glasses | medicine
+  status         String        @default("UNPAID")  // UNPAID | PAID | CANCELLED
+  subtotal       Int           @default(0)
+  discount       Int           @default(0)
+  voucherCode    String?       // Mã voucher
+  voucherDiscount Int          @default(0) // Giảm giá từ voucher
+  processingFee  Int           @default(0) // Phí gia công (cho kính)
+  shippingFee    Int           @default(0) // Phí vận chuyển
+  serviceFee     Int           @default(0) // Phí dịch vụ
+  tax            Int           @default(0)
+  total          Int           @default(0)
+  signature      String?       // Base64 signature
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  items          InvoiceItem[]
+}
+
+// Invoice items
+model InvoiceItem {
+  id         String   @id @default(cuid())
+  invoice    Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoiceId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+  quantity   Int      @default(1)
+  unitPrice  Int      @default(0)
+  totalPrice Int      @default(0)
+}
+
+// Voucher
+model Voucher {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  description String?
+  type        String    @default("percent") // percent | fixed
+  value       Int       // Giá trị % hoặc số tiền
+  minAmount   Int       @default(0) // Giá trị đơn hàng tối thiểu
+  maxDiscount Int?      // Giảm tối đa (cho percent)
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean   @default(true)
+  usageLimit  Int?      // Số lần sử dụng tối đa
+  usageCount  Int       @default(0) // Số lần đã sử dụng
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Settings
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+
+

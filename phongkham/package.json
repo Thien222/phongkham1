@@ -1,0 +1,17 @@
+{
+  "name": "eye-clinic",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Eye Clinic Management - MERN + Electron (workspaces)",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "server": "npm --workspace apps/server run dev",
+    "build:server": "npm --workspace apps/server run build",
+    "client": "npm --workspace apps/client run dev",
+    "dev": "echo Run server and client after dependencies are installed"
+  }
+}
+
+
