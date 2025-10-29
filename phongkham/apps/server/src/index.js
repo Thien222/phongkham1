@@ -47,17 +47,34 @@ app.use('/api/backup', backupRouter);
 app.use('/api/settings', settingsRouter);
 
 // Serve static files from client build
-// Check if running from portable package or development
-const clientDistPath = path.join(__dirname, '../../client/dist');
+// Auto-detect correct path for portable vs development
 const portableClientPath = path.join(__dirname, '../client-dist');
-const finalClientPath = fs.existsSync(portableClientPath) ? portableClientPath : clientDistPath;
+const devClientPath = path.join(__dirname, '../../client/dist');
+
+// Check which path has index.html
+let finalClientPath;
+if (fs.existsSync(path.join(portableClientPath, 'index.html'))) {
+  finalClientPath = portableClientPath;
+  console.log('Using portable frontend:', portableClientPath);
+} else if (fs.existsSync(path.join(devClientPath, 'index.html'))) {
+  finalClientPath = devClientPath;
+  console.log('Using development frontend:', devClientPath);
+} else {
+  finalClientPath = portableClientPath; // fallback
+  console.warn('Warning: Frontend index.html not found in either path!');
+}
 
 app.use(express.static(finalClientPath));
 
 // SPA fallback - serve index.html for all non-API routes
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(finalClientPath, 'index.html'));
+    const indexPath = path.join(finalClientPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(404).json({ ok: false, message: 'Frontend not found. Please ensure index.html exists.' });
+    }
   } else {
     res.status(404).json({ ok: false, message: 'API endpoint not found' });
   }
