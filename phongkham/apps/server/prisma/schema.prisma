@@ -8,6 +8,18 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// User accounts
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  fullName  String
+  role      String   @default("user") // user | admin
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // Patient information
 model Patient {
   id           String        @id @default(cuid())
@@ -17,7 +29,7 @@ model Patient {
   gender       String?
   birthDate    DateTime?
   address      String?
-  visitPurpose String        @default("both") // examination | refraction | both
+  visitPurpose String        @default("both") // examination | refraction | both | examination,refraction
   visitStatus  String        @default("waiting") // waiting | in_progress | completed
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -100,7 +112,10 @@ model Invoice {
   tax            Int           @default(0)
   total          Int           @default(0)
   signature      String?       // Base64 signature
-  notes          String?
+  notes          String?       // Ghi chú
+  instructions   String?       // Hướng dẫn sử dụng
+  dosage         String?       // Liều lượng (cho thuốc)
+  followUpDate   DateTime?     // Ngày hẹn tái khám
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   items          InvoiceItem[]

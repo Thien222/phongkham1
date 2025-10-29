@@ -10,6 +10,9 @@ import invoicesRouter from './routes/invoices.js';
 import examinationsRouter from './routes/examinations.js';
 import statsRouter from './routes/stats.js';
 import vouchersRouter from './routes/vouchers.js';
+import authRouter from './routes/auth.js';
+import backupRouter from './routes/backup.js';
+import settingsRouter from './routes/settings.js';
 import { backupDatabase } from './scripts/backup.js';
 
 dotenv.config();
@@ -33,6 +36,9 @@ app.use('/api/invoices', invoicesRouter);
 app.use('/api/examinations', examinationsRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/vouchers', vouchersRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/backup', backupRouter);
+app.use('/api/settings', settingsRouter);
 
 async function start() {
   try {

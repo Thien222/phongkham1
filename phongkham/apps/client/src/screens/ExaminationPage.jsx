@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, Select, Button, Input, Form, DatePicker, message, Row, Col, Table, Space, Modal, Tag } from 'antd';
-import { SearchOutlined, SaveOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined, SaveOutlined, EyeOutlined, EditOutlined, DeleteOutlined, SwapOutlined } from '@ant-design/icons';
 import { fetchPatients, fetchExaminations, createExamination, updateExamination, deleteExamination } from '../lib/api';
+import api from '../lib/api';
 import dayjs from 'dayjs';
 
 const { TextArea } = Input;
@@ -113,6 +114,36 @@ export function ExaminationPage() {
     setDetailsVisible(true);
   };
 
+  const handleSwitchToRefraction = async () => {
+    if (!selectedPatient) {
+      message.warning('Vui lòng chọn bệnh nhân');
+      return;
+    }
+
+    try {
+      // Add "refraction" to visit purpose
+      await api.patch(`/patients/${selectedPatient.id}/visit-purpose`, {
+        addPurpose: 'refraction'
+      });
+      
+      message.success('Đã chuyển bệnh nhân sang Khúc xạ');
+      
+      // Navigate to Refraction page (or you can use React Router if available)
+      // For now, just show a message
+      Modal.info({
+        title: 'Chuyển sang Khúc xạ',
+        content: 'Bệnh nhân đã được thêm vào danh sách Khúc xạ. Vui lòng chuyển sang tab Khúc xạ để tiếp tục.',
+        onOk: () => {
+          // Reload patients to update the visitPurpose
+          loadPatients();
+        }
+      });
+    } catch (error) {
+      console.error('Error switching to refraction:', error);
+      message.error('Không thể chuyển sang Khúc xạ');
+    }
+  };
+
   const columns = [
     {
       title: 'Ngày khám',
@@ -197,9 +228,15 @@ export function ExaminationPage() {
                 <Card type="inner" style={{ marginBottom: 16, background: '#f5f5f5' }}>
                   <p><strong>Mã BN:</strong> {selectedPatient.code}</p>
                   <p><strong>SĐT:</strong> {selectedPatient.phone || '-'}</p>
-                  <p style={{ marginBottom: 0 }}>
-                    <strong>Giới tính:</strong> {selectedPatient.gender === 'male' ? 'Nam' : selectedPatient.gender === 'female' ? 'Nữ' : 'Khác'}
-                  </p>
+                  <p><strong>Giới tính:</strong> {selectedPatient.gender === 'male' ? 'Nam' : selectedPatient.gender === 'female' ? 'Nữ' : 'Khác'}</p>
+                  <Button 
+                    icon={<SwapOutlined />} 
+                    onClick={handleSwitchToRefraction}
+                    block
+                    style={{ marginTop: 8 }}
+                  >
+                    Chuyển sang Khúc xạ
+                  </Button>
                 </Card>
               )}
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Table, Button, Input, Modal, Form, DatePicker, Select, message, Space, Tag } from 'antd';
+import { Card, Table, Button, Input, Modal, Form, DatePicker, Select, message, Space, Tag, Checkbox } from 'antd';
 import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { fetchPatients, createPatient, updatePatient, deletePatient } from '../lib/api';
 import dayjs from 'dayjs';
@@ -44,9 +44,20 @@ export function ReceptionPage() {
 
   const handleEdit = (record) => {
     setSelectedPatient(record);
+    // Convert visitPurpose string to array for checkbox
+    let visitPurposeValue = record.visitPurpose;
+    if (visitPurposeValue && visitPurposeValue.includes(',')) {
+      visitPurposeValue = visitPurposeValue.split(',');
+    } else if (visitPurposeValue === 'both') {
+      visitPurposeValue = ['examination', 'refraction'];
+    } else {
+      visitPurposeValue = [visitPurposeValue];
+    }
+    
     form.setFieldsValue({
       ...record,
-      birthDate: record.birthDate ? dayjs(record.birthDate) : null
+      birthDate: record.birthDate ? dayjs(record.birthDate) : null,
+      visitPurpose: visitPurposeValue
     });
     setModalVisible(true);
   };
@@ -77,8 +88,21 @@ export function ReceptionPage() {
 
   const handleSubmit = async (values) => {
     try {
+      // Convert visitPurpose array to string
+      let visitPurpose = 'both';
+      if (values.visitPurpose && Array.isArray(values.visitPurpose)) {
+        if (values.visitPurpose.length === 0) {
+          message.warning('Vui lòng chọn ít nhất một mục đích khám');
+          return;
+        }
+        visitPurpose = values.visitPurpose.sort().join(',');
+      } else if (values.visitPurpose) {
+        visitPurpose = values.visitPurpose;
+      }
+      
       const data = {
         ...values,
+        visitPurpose,
         birthDate: values.birthDate ? values.birthDate.toISOString() : null
       };
       
@@ -141,6 +165,20 @@ export function ReceptionPage() {
           'refraction': { text: 'Cắt kính', color: 'green' },
           'both': { text: 'Cả hai', color: 'purple' }
         };
+        
+        // Handle multiple purposes
+        if (purpose && purpose.includes(',')) {
+          const purposes = purpose.split(',');
+          return (
+            <Space size={4}>
+              {purposes.map(p => {
+                const config = purposeMap[p] || { text: p, color: 'default' };
+                return <Tag key={p} color={config.color}>{config.text}</Tag>;
+              })}
+            </Space>
+          );
+        }
+        
         const config = purposeMap[purpose] || { text: purpose, color: 'default' };
         return <Tag color={config.color}>{config.text}</Tag>;
       }
@@ -284,13 +322,14 @@ export function ReceptionPage() {
             name="visitPurpose"
             label="Mục đích khám"
             rules={[{ required: true, message: 'Vui lòng chọn mục đích khám' }]}
-            initialValue="both"
+            initialValue={['examination', 'refraction']}
           >
-            <Select placeholder="Chọn mục đích khám">
-              <Select.Option value="examination">Khám mắt</Select.Option>
-              <Select.Option value="refraction">Cắt kính</Select.Option>
-              <Select.Option value="both">Cả hai</Select.Option>
-            </Select>
+            <Checkbox.Group>
+              <Space direction="vertical">
+                <Checkbox value="examination">Khám mắt</Checkbox>
+                <Checkbox value="refraction">Cắt kính / Khúc xạ</Checkbox>
+              </Space>
+            </Checkbox.Group>
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>

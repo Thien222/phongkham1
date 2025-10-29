@@ -103,15 +103,31 @@ export function InvoicesPage() {
   };
 
   const generatePrintContent = (invoice) => {
-    const items = invoice.items.map((item, idx) => `
-      <tr>
-        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${idx + 1}</td>
-        <td style="border: 1px solid #ddd; padding: 8px;">${item.product.name}</td>
-        <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantity}</td>
-        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${item.unitPrice.toLocaleString()} đ</td>
-        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${item.totalPrice.toLocaleString()} đ</td>
-      </tr>
-    `).join('');
+    const items = invoice.items.map((item, idx) => {
+      const product = item.product;
+      let productDetails = product.name;
+      if (product.category === 'glasses' || product.category === 'lenses') {
+        if (product.sphRange || product.cylRange) {
+          productDetails += `<br><small style="color: #666;">`;
+          if (product.sphRange) productDetails += `SPH: ${product.sphRange}`;
+          if (product.cylRange) productDetails += ` | CYL: ${product.cylRange}`;
+          productDetails += `</small>`;
+        }
+      }
+      if (product.manufacturer) {
+        productDetails += `<br><small style="color: #666;">NSX: ${product.manufacturer}</small>`;
+      }
+      
+      return `
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${idx + 1}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${productDetails}</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.quantity}</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${item.unitPrice.toLocaleString()} đ</td>
+          <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${item.totalPrice.toLocaleString()} đ</td>
+        </tr>
+      `;
+    }).join('');
 
     return `
       <!DOCTYPE html>
@@ -152,7 +168,10 @@ export function InvoicesPage() {
           <h3>Thông tin bệnh nhân</h3>
           <p><strong>Họ tên:</strong> ${invoice.patient.fullName}</p>
           <p><strong>Mã BN:</strong> ${invoice.patient.code}</p>
+          <p><strong>Giới tính:</strong> ${invoice.patient.gender === 'male' ? 'Nam' : invoice.patient.gender === 'female' ? 'Nữ' : 'Khác'}</p>
+          <p><strong>Ngày sinh:</strong> ${dayjs(invoice.patient.dob).format('DD/MM/YYYY')}</p>
           <p><strong>Số điện thoại:</strong> ${invoice.patient.phone || 'N/A'}</p>
+          <p><strong>Địa chỉ:</strong> ${invoice.patient.address || 'N/A'}</p>
         </div>
         
         <h3>Thông tin khúc xạ</h3>
@@ -173,6 +192,16 @@ export function InvoicesPage() {
           <p><strong>Giảm giá:</strong> ${invoice.discount.toLocaleString()} đ</p>
           <h3 style="color: #1890ff;"><strong>Tổng thanh toán:</strong> ${invoice.total.toLocaleString()} đ</h3>
         </div>
+        
+        ${invoice.dosage || invoice.instructions || invoice.notes || invoice.followUpDate ? `
+          <div class="info" style="border: 2px solid #1890ff; padding: 15px; border-radius: 8px; margin-top: 20px;">
+            <h3 style="color: #1890ff;">Dặn dò và hướng dẫn</h3>
+            ${invoice.dosage ? `<p><strong>Liều lượng:</strong> ${invoice.dosage}</p>` : ''}
+            ${invoice.instructions ? `<p><strong>Hướng dẫn sử dụng:</strong> ${invoice.instructions}</p>` : ''}
+            ${invoice.notes ? `<p><strong>Ghi chú:</strong> ${invoice.notes}</p>` : ''}
+            ${invoice.followUpDate ? `<p><strong>Hẹn tái khám:</strong> ${dayjs(invoice.followUpDate).format('DD/MM/YYYY')}</p>` : ''}
+          </div>
+        ` : ''}
         
         <div class="signature">
           <div style="text-align: center;">

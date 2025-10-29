@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Card, Select, Button, Input, Form, DatePicker, message, Row, Col, Divider, Table, Space, Tag } from 'antd';
-import { SearchOutlined, PlusOutlined, SaveOutlined } from '@ant-design/icons';
+import { Card, Select, Button, Input, Form, DatePicker, message, Row, Col, Divider, Table, Space, Tag, Modal } from 'antd';
+import { SearchOutlined, PlusOutlined, SaveOutlined, SwapOutlined } from '@ant-design/icons';
 import { fetchPatients, createRefraction, fetchProducts } from '../lib/api';
 import { CreateInvoiceModal } from '../components/CreateInvoiceModal';
+import api from '../lib/api';
 import dayjs from 'dayjs';
 
 export function RefractionPage() {
@@ -12,11 +13,12 @@ export function RefractionPage() {
   const [recommendations, setRecommendations] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [form] = Form.useForm();
 
   useEffect(() => {
     loadPatients();
-    loadProducts();
+    loadAllProducts();
   }, []);
 
   const loadPatients = async (q = '') => {
@@ -29,10 +31,14 @@ export function RefractionPage() {
     }
   };
 
-  const loadProducts = async () => {
+  const loadAllProducts = async () => {
     try {
-      const data = await fetchProducts('glasses');
-      setProducts(data);
+      // Load CẢ tròng kính VÀ gọng kính
+      const [glassesData, framesData] = await Promise.all([
+        fetchProducts('glasses'),
+        fetchProducts('lenses')
+      ]);
+      setProducts([...glassesData, ...framesData]);
     } catch (error) {
       message.error('Không thể tải danh sách sản phẩm');
     }
@@ -188,7 +194,46 @@ export function RefractionPage() {
     setShowInvoiceModal(false);
   };
 
+  const handleSwitchToExamination = async () => {
+    if (!selectedPatient) {
+      message.warning('Vui lòng chọn bệnh nhân');
+      return;
+    }
+
+    try {
+      // Add "examination" to visit purpose
+      await api.patch(`/patients/${selectedPatient.id}/visit-purpose`, {
+        addPurpose: 'examination'
+      });
+      
+      message.success('Đã chuyển bệnh nhân sang Khám bệnh');
+      
+      Modal.info({
+        title: 'Chuyển sang Khám bệnh',
+        content: 'Bệnh nhân đã được thêm vào danh sách Khám bệnh. Vui lòng chuyển sang tab Khám bệnh để tiếp tục.',
+        onOk: () => {
+          // Reload patients to update the visitPurpose
+          loadPatients();
+        }
+      });
+    } catch (error) {
+      console.error('Error switching to examination:', error);
+      message.error('Không thể chuyển sang Khám bệnh');
+    }
+  };
+
   const recommendationColumns = [
+    {
+      title: 'Loại',
+      dataIndex: 'category',
+      key: 'category',
+      width: 120,
+      render: (cat) => (
+        <Tag color={cat === 'glasses' ? 'blue' : 'green'}>
+          {cat === 'glasses' ? 'Tròng kính' : 'Gọng kính'}
+        </Tag>
+      )
+    },
     {
       title: 'Tên sản phẩm',
       dataIndex: 'name',
@@ -198,15 +243,15 @@ export function RefractionPage() {
       title: 'Chỉ số SPH',
       dataIndex: 'sphRange',
       key: 'sphRange',
-      width: 150,
-      render: (text) => text || 'Tất cả'
+      width: 120,
+      render: (text) => text || '-'
     },
     {
       title: 'Chỉ số CYL',
       dataIndex: 'cylRange',
       key: 'cylRange',
-      width: 150,
-      render: (text) => text || 'Tất cả'
+      width: 120,
+      render: (text) => text || '-'
     },
     {
       title: 'Chất liệu',
@@ -290,6 +335,14 @@ export function RefractionPage() {
                 <Col span={8}><strong>Mã BN:</strong> {selectedPatient.code}</Col>
                 <Col span={8}><strong>SĐT:</strong> {selectedPatient.phone || '-'}</Col>
               </Row>
+              <Button 
+                icon={<SwapOutlined />} 
+                onClick={handleSwitchToExamination}
+                block
+                style={{ marginTop: 12 }}
+              >
+                Chuyển sang Khám bệnh
+              </Button>
             </Card>
           )}
 
@@ -374,7 +427,20 @@ export function RefractionPage() {
 
         {recommendations.length > 0 && (
           <>
-            <Divider>Sản phẩm phù hợp với chỉ số khúc xạ ({recommendations.length} sản phẩm)</Divider>
+            <Divider>Sản phẩm gợi ý ({recommendations.filter(p => 
+              p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              p.code.toLowerCase().includes(searchQuery.toLowerCase())
+            ).length}/{recommendations.length} sản phẩm)</Divider>
+            
+            <Input
+              placeholder="Tìm kiếm sản phẩm..."
+              prefix={<SearchOutlined />}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ marginBottom: '16px', width: '300px' }}
+              allowClear
+            />
+            
             {selectedProducts.length === 0 && (
               <div style={{ 
                 background: '#e6f7ff', 
@@ -384,12 +450,15 @@ export function RefractionPage() {
                 marginBottom: '16px',
                 color: '#0050b3'
               }}>
-                💡 <strong>Hướng dẫn:</strong> Click nút <strong>"Thêm"</strong> bên phải mỗi sản phẩm để thêm vào đơn hàng, sau đó click <strong>"Tạo đơn hàng"</strong> để tạo hóa đơn.
+                💡 <strong>Lưu ý:</strong> Hóa đơn kính cần có CẢ tròng kính VÀ gọng kính. Click nút <strong>"Thêm"</strong> để chọn sản phẩm, sau đó click <strong>"Tạo đơn hàng"</strong>.
               </div>
             )}
             <Table
               columns={recommendationColumns}
-              dataSource={recommendations}
+              dataSource={recommendations.filter(p => 
+                p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                p.code.toLowerCase().includes(searchQuery.toLowerCase())
+              )}
               rowKey="id"
               pagination={{ pageSize: 10 }}
               size="small"

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import prisma from '../db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,10 +12,20 @@ export async function backupDatabase() {
     const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, -5);
     
     // Đường dẫn database
-    const dbPath = path.join(__dirname, '../../dev.db');
+    const dbPath = path.join(__dirname, '../../prisma/dev.db');
+    
+    // Lấy backupPath từ settings (nếu có)
+    const backupPathSetting = await prisma.setting.findUnique({
+      where: { key: 'backupPath' }
+    }).catch(() => null);
     
     // Tạo thư mục backups nếu chưa có
-    const backupDir = path.join(__dirname, '../../backups');
+    let backupDir;
+    if (backupPathSetting && backupPathSetting.value && backupPathSetting.value.trim()) {
+      backupDir = path.resolve(backupPathSetting.value.trim());
+    } else {
+      backupDir = path.join(__dirname, '../../backups');
+    }
     if (!fs.existsSync(backupDir)) {
       fs.mkdirSync(backupDir, { recursive: true });
     }
@@ -30,8 +41,14 @@ export async function backupDatabase() {
     console.log(`   Đường dẫn: ${backupPath}`);
     console.log(`   Thời gian: ${now.toLocaleString('vi-VN')}`);
     
-    // Dọn dẹp các backup cũ (giữ lại 30 backup gần nhất)
-    cleanOldBackups(backupDir, 30);
+    // Lấy maxBackups từ settings
+    const maxBackupsSetting = await prisma.setting.findUnique({
+      where: { key: 'maxBackups' }
+    }).catch(() => null);
+    const maxBackups = maxBackupsSetting ? parseInt(maxBackupsSetting.value) : 30;
+    
+    // Dọn dẹp các backup cũ
+    cleanOldBackups(backupDir, maxBackups);
     
     return { success: true, path: backupPath, fileName: backupFileName };
   } catch (error) {

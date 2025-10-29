@@ -169,4 +169,4 @@ export async function deleteVoucher(id) {
   return res.data;
 }
 
-
+export default api;

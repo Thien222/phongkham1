@@ -381,13 +381,60 @@ export function InventoryPage() {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="sphRange" label="Tính năng (SPH Range)">
-                <Input placeholder="VD: -20.00 đến +20.00" />
+                <Select
+                  showSearch
+                  allowClear
+                  placeholder="Chọn độ SPH"
+                  filterOption={(input, option) =>
+                    option.value.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  <Select.Option value="Plano">Plano (0.00)</Select.Option>
+                  {(() => {
+                    const options = [];
+                    for (let i = -20; i <= 20; i += 0.25) {
+                      if (i !== 0) { // Skip 0 since we have Plano
+                        const value = i.toFixed(2);
+                        const sign = i > 0 ? '+' : '';
+                        options.push(
+                          <Select.Option key={value} value={sign + value}>
+                            {sign + value}
+                          </Select.Option>
+                        );
+                      }
+                    }
+                    return options;
+                  })()}
+                </Select>
               </Form.Item>
             </Col>
             
             <Col span={12}>
               <Form.Item name="cylRange" label="Độ loạn (CYL Range)">
-                <Input placeholder="VD: 0.00 đến -8.00" />
+                <Select
+                  showSearch
+                  allowClear
+                  placeholder="Chọn độ CYL"
+                  filterOption={(input, option) =>
+                    option.value.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  <Select.Option value="Plano">Plano (0.00)</Select.Option>
+                  {(() => {
+                    const options = [];
+                    for (let i = -8; i <= 0; i += 0.25) {
+                      if (i !== 0) { // Skip 0 since we have Plano
+                        const value = i.toFixed(2);
+                        options.push(
+                          <Select.Option key={value} value={value}>
+                            {value}
+                          </Select.Option>
+                        );
+                      }
+                    }
+                    return options;
+                  })()}
+                </Select>
               </Form.Item>
             </Col>
           </Row>

@@ -85,7 +85,7 @@ export function DashboardPage() {
         </Col>
       </Row>
 
-      <Card title="Thao tác nhanh" bordered={false}>
+      <Card title="Thao tác nhanh" variant="borderless">
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} lg={6}>
             <Card 
@@ -136,7 +136,7 @@ export function DashboardPage() {
 
       <Row gutter={16}>
         <Col xs={24} lg={12}>
-          <Card title="Hoạt động gần đây" bordered={false}>
+          <Card title="Hoạt động gần đây" variant="borderless">
             {stats?.recentPatients && stats.recentPatients.length > 0 ? (
               <List
                 itemLayout="horizontal"
@@ -163,7 +163,7 @@ export function DashboardPage() {
         </Col>
 
         <Col xs={24} lg={12}>
-          <Card title="Đo khúc xạ gần đây" bordered={false}>
+          <Card title="Đo khúc xạ gần đây" variant="borderless">
             {stats?.recentRefractions && stats.recentRefractions.length > 0 ? (
               <List
                 itemLayout="horizontal"

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { prisma } from '../db.js';
+import prisma from '../db.js';
 
 const router = Router();
 
@@ -22,11 +22,21 @@ router.get('/', async (req, res, next) => {
       ];
     }
     
-    // Visit purpose filter - if requesting "examination", show "examination" OR "both"
+    // Visit purpose filter - if requesting "examination", show "examination" OR "both" OR "examination,refraction"
     if (visitPurpose === 'examination') {
-      whereClause.visitPurpose = { in: ['examination', 'both'] };
+      whereClause.OR = whereClause.OR || [];
+      whereClause.OR.push(
+        { visitPurpose: 'examination' },
+        { visitPurpose: 'both' },
+        { visitPurpose: { contains: 'examination' } }
+      );
     } else if (visitPurpose === 'refraction') {
-      whereClause.visitPurpose = { in: ['refraction', 'both'] };
+      whereClause.OR = whereClause.OR || [];
+      whereClause.OR.push(
+        { visitPurpose: 'refraction' },
+        { visitPurpose: 'both' },
+        { visitPurpose: { contains: 'refraction' } }
+      );
     } else if (visitPurpose && visitPurpose !== 'all') {
       whereClause.visitPurpose = visitPurpose;
     }
@@ -112,6 +122,54 @@ router.put('/:id', async (req, res, next) => {
         visitStatus
       }
     });
+    res.json(updated);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Add visit purpose to patient (PATCH)
+router.patch('/:id/visit-purpose', async (req, res, next) => {
+  try {
+    const { addPurpose } = req.body ?? {}; // "examination" | "refraction"
+    
+    const patient = await prisma.patient.findUnique({
+      where: { id: req.params.id }
+    });
+    
+    if (!patient) {
+      return res.status(404).json({ error: 'Patient not found' });
+    }
+    
+    let currentPurpose = patient.visitPurpose;
+    let newPurpose = currentPurpose;
+    
+    // If adding a purpose
+    if (addPurpose) {
+      if (currentPurpose === 'both' || currentPurpose === 'examination,refraction' || currentPurpose === 'refraction,examination') {
+        // Already has both, no change
+        newPurpose = 'examination,refraction';
+      } else if (currentPurpose.includes(',')) {
+        // Already has multiple, check if need to add
+        const purposes = currentPurpose.split(',');
+        if (!purposes.includes(addPurpose)) {
+          purposes.push(addPurpose);
+          newPurpose = purposes.sort().join(',');
+        }
+      } else if (currentPurpose === addPurpose) {
+        // Already has this purpose
+        newPurpose = currentPurpose;
+      } else {
+        // Add new purpose
+        newPurpose = [currentPurpose, addPurpose].sort().join(',');
+      }
+    }
+    
+    const updated = await prisma.patient.update({
+      where: { id: req.params.id },
+      data: { visitPurpose: newPurpose }
+    });
+    
     res.json(updated);
   } catch (err) {
     next(err);

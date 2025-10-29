@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Modal, Table, Button, Input, InputNumber, message, Space, Divider, Form } from 'antd';
+import { Modal, Table, Button, Input, InputNumber, message, Space, Divider, Form, DatePicker } from 'antd';
 import { createInvoice, validateVoucher } from '../lib/api';
+import dayjs from 'dayjs';
 
 export function CreateInvoiceModal({ visible, onClose, patient, products, type = 'glasses' }) {
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -12,6 +13,10 @@ export function CreateInvoiceModal({ visible, onClose, patient, products, type =
   const [discount, setDiscount] = useState(0);
   const [validating, setValidating] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [notes, setNotes] = useState('');
+  const [instructions, setInstructions] = useState('');
+  const [dosage, setDosage] = useState('');
+  const [followUpDate, setFollowUpDate] = useState(null);
   
   // Update selectedProducts when products prop changes or modal opens
   useEffect(() => {
@@ -23,6 +28,10 @@ export function CreateInvoiceModal({ visible, onClose, patient, products, type =
       setVoucherCode('');
       setVoucherDiscount(0);
       setDiscount(0);
+      setNotes('');
+      setInstructions('');
+      setDosage('');
+      setFollowUpDate(null);
     }
   }, [products, visible]);
 
@@ -104,7 +113,11 @@ export function CreateInvoiceModal({ visible, onClose, patient, products, type =
         voucherDiscount,
         processingFee,
         shippingFee,
-        serviceFee
+        serviceFee,
+        notes: notes.trim() || null,
+        instructions: instructions.trim() || null,
+        dosage: dosage.trim() || null,
+        followUpDate: followUpDate ? followUpDate.toISOString() : null
       };
 
       await createInvoice(invoiceData);
@@ -262,6 +275,55 @@ export function CreateInvoiceModal({ visible, onClose, patient, products, type =
                 ✓ Giảm từ voucher: {voucherDiscount.toLocaleString()} đ
               </div>
             )}
+          </Space>
+        </div>
+
+        <Divider />
+
+        <div style={{ marginBottom: 16 }}>
+          <h4>Dặn dò và hướng dẫn</h4>
+          <Space direction="vertical" style={{ width: '100%' }}>
+            {type === 'medicine' && (
+              <div>
+                <label style={{ display: 'block', marginBottom: 4 }}>Liều lượng:</label>
+                <Input.TextArea
+                  rows={2}
+                  value={dosage}
+                  onChange={(e) => setDosage(e.target.value)}
+                  placeholder="VD: Ngày 2 lần, sáng và tối, mỗi lần 1 viên"
+                />
+              </div>
+            )}
+            <div>
+              <label style={{ display: 'block', marginBottom: 4 }}>Hướng dẫn sử dụng:</label>
+              <Input.TextArea
+                rows={2}
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
+                placeholder={type === 'glasses' ? 
+                  'VD: Đeo kính thường xuyên, tránh để kính tiếp xúc với nhiệt độ cao' : 
+                  'VD: Uống sau bữa ăn, không uống cùng rượu, bia'}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: 4 }}>Ghi chú thêm:</label>
+              <Input.TextArea
+                rows={2}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Các ghi chú khác..."
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: 4 }}>Hẹn tái khám:</label>
+              <DatePicker
+                value={followUpDate}
+                onChange={setFollowUpDate}
+                format="DD/MM/YYYY"
+                placeholder="Chọn ngày hẹn tái khám"
+                style={{ width: '100%' }}
+              />
+            </div>
           </Space>
         </div>
 
