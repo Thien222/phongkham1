@@ -1,0 +1,15 @@
+{
+  "name": "phongkham-server",
+  "version": "1.0.0",
+  "main": "index.cjs",
+  "bin": "index.cjs",
+  "type": "commonjs",
+  "pkg": {
+    "assets": [
+      "../../../node_modules/@prisma/client/**/*",
+      "../../../node_modules/.prisma/**/*",
+      "../../client/dist/**/*"
+    ]
+  }
+}
+
