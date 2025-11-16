@@ -85,19 +85,41 @@ router.get('/:id', async (req, res, next) => {
 // Create new patient
 router.post('/', async (req, res, next) => {
   try {
-    const { fullName, phone, gender, birthDate, address, visitPurpose, visitStatus } = req.body ?? {};
+    const { 
+      fullName, phone, gender, birthDate, address, visitPurpose, visitStatus,
+      initialVaOd, initialVaOs, hasGlasses, visitReason, notes
+    } = req.body ?? {};
+    
+    // Generate patient code
     const count = await prisma.patient.count();
     const code = `BN${String(count + 1).padStart(12, '0')}`;
+    
+    // Generate queue number (reset daily) - STT001, STT002, ...
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayPatients = await prisma.patient.count({
+      where: {
+        createdAt: { gte: today }
+      }
+    });
+    const queueNumber = `STT${String(todayPatients + 1).padStart(3, '0')}`;
+    
     const created = await prisma.patient.create({
       data: { 
-        code, 
+        code,
+        queueNumber,
         fullName, 
         phone: phone || null, 
         gender, 
         birthDate: birthDate ? new Date(birthDate) : null, 
         address,
         visitPurpose: visitPurpose || 'both',
-        visitStatus: visitStatus || 'waiting'
+        visitStatus: visitStatus || 'waiting',
+        initialVaOd: initialVaOd || null,
+        initialVaOs: initialVaOs || null,
+        hasGlasses: hasGlasses || false,
+        visitReason: visitReason || null,
+        notes: notes || null
       }
     });
     res.status(201).json(created);
@@ -109,18 +131,28 @@ router.post('/', async (req, res, next) => {
 // Update patient
 router.put('/:id', async (req, res, next) => {
   try {
-    const { fullName, phone, gender, birthDate, address, visitPurpose, visitStatus } = req.body ?? {};
+    const { 
+      fullName, phone, gender, birthDate, address, visitPurpose, visitStatus,
+      initialVaOd, initialVaOs, hasGlasses, visitReason, notes
+    } = req.body ?? {};
+    
+    const updateData = {};
+    if (fullName !== undefined) updateData.fullName = fullName;
+    if (phone !== undefined) updateData.phone = phone;
+    if (gender !== undefined) updateData.gender = gender;
+    if (birthDate !== undefined) updateData.birthDate = birthDate ? new Date(birthDate) : null;
+    if (address !== undefined) updateData.address = address;
+    if (visitPurpose !== undefined) updateData.visitPurpose = visitPurpose;
+    if (visitStatus !== undefined) updateData.visitStatus = visitStatus;
+    if (initialVaOd !== undefined) updateData.initialVaOd = initialVaOd;
+    if (initialVaOs !== undefined) updateData.initialVaOs = initialVaOs;
+    if (hasGlasses !== undefined) updateData.hasGlasses = hasGlasses;
+    if (visitReason !== undefined) updateData.visitReason = visitReason;
+    if (notes !== undefined) updateData.notes = notes;
+    
     const updated = await prisma.patient.update({
       where: { id: req.params.id },
-      data: { 
-        fullName, 
-        phone, 
-        gender, 
-        birthDate: birthDate ? new Date(birthDate) : null, 
-        address,
-        visitPurpose,
-        visitStatus
-      }
+      data: updateData
     });
     res.json(updated);
   } catch (err) {

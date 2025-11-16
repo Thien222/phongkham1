@@ -53,7 +53,18 @@ async function main() {
         { key: 'taxRate', value: '10' },
         { key: 'lowStockThreshold', value: '5' },
         { key: 'maxBackups', value: '10' },
-        { key: 'backupPath', value: '' }
+        { key: 'backupPath', value: '' },
+        // Settings cho phiếu khúc xạ
+        { key: 'refractionSheetTitle', value: 'PHIẾU KHÚC XẠ' },
+        { key: 'refractionSheetClinicName', value: 'PHÒNG KHÁM MẮT NGOẠI GIỜ' },
+        { key: 'refractionSheetDoctorName', value: 'BSCKII. HỨA TRUNG KIÊN' },
+        { key: 'refractionSheetClinicPhone', value: '0971416421 – 0849274364' },
+        { key: 'refractionSheetWorkingHours', value: 'Từ 8h đến 19h. Thứ hai đến Chủ nhật' },
+        { key: 'refractionSheetClinicAddress', value: 'Thị trấn Vĩnh Thuận, xã Vĩnh Phong, tỉnh An Giang' },
+        // Settings cho phiếu số thứ tự
+        { key: 'queueTicketClinicName', value: 'PHÒNG KHÁM MẮT NGOẠI GIỜ' },
+        { key: 'queueTicketDoctorName', value: 'BSCKII. HỨA TRUNG KIÊN' },
+        { key: 'queueTicketNote', value: 'Khách hàng vui lòng chờ đến STT' }
       ]
     });
   }
@@ -203,12 +214,12 @@ async function main() {
       }
     }),
     
-    // GỌNG KÍNH (Frames/Lenses)
+    // GỌNG KÍNH (Frames)
     prisma.product.create({
       data: {
         code: 'G001',
         name: 'Gọng kính kim loại bạc Titanium',
-        category: 'lenses',
+        category: 'frames',
         manufacturer: 'Rayban',
         material: 'Titanium, siêu nhẹ',
         price: 350000,
@@ -221,7 +232,7 @@ async function main() {
       data: {
         code: 'G002',
         name: 'Gọng kính nhựa TR90 đen',
-        category: 'lenses',
+        category: 'frames',
         manufacturer: 'Oakley',
         material: 'TR90, dẻo dai',
         price: 280000,
@@ -234,7 +245,7 @@ async function main() {
       data: {
         code: 'G003',
         name: 'Gọng kính vuông Vintage',
-        category: 'lenses',
+        category: 'frames',
         manufacturer: 'Gucci',
         material: 'Acetate cao cấp',
         price: 450000,
@@ -247,7 +258,7 @@ async function main() {
       data: {
         code: 'G004',
         name: 'Gọng kính tròn Harry Potter',
-        category: 'lenses',
+        category: 'frames',
         manufacturer: 'Gentle Monster',
         material: 'Kim loại vàng',
         price: 320000,
@@ -260,13 +271,143 @@ async function main() {
       data: {
         code: 'G005',
         name: 'Gọng kính nửa viền thể thao',
-        category: 'lenses',
+        category: 'frames',
         manufacturer: 'Nike',
         material: 'Nhựa composite',
         price: 290000,
         quantity: 32,
         minStock: 6,
         imageUrl: 'https://images.unsplash.com/photo-1589782182703-2aaa69037b5b?w=400'
+      }
+    }),
+    prisma.product.create({
+      data: {
+        code: 'G006',
+        name: 'Gọng kính Aviator phi công',
+        category: 'frames',
+        manufacturer: 'Rayban',
+        material: 'Kim loại mạ vàng',
+        price: 420000,
+        quantity: 18,
+        minStock: 5,
+        imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400'
+      }
+    }),
+    prisma.product.create({
+      data: {
+        code: 'G007',
+        name: 'Gọng kính Wayfarer cổ điển',
+        category: 'frames',
+        manufacturer: 'Rayban',
+        material: 'Acetate đen',
+        price: 380000,
+        quantity: 22,
+        minStock: 5,
+        imageUrl: 'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=400'
+      }
+    }),
+    prisma.product.create({
+      data: {
+        code: 'G008',
+        name: 'Gọng kính Cat Eye nữ',
+        category: 'frames',
+        manufacturer: 'Prada',
+        material: 'Acetate họa tiết',
+        price: 510000,
+        quantity: 15,
+        minStock: 4,
+        imageUrl: 'https://images.unsplash.com/photo-1589782182703-2aaa69037b5b?w=400'
+      }
+    }),
+    prisma.product.create({
+      data: {
+        code: 'G009',
+        name: 'Gọng kính Clubmaster retro',
+        category: 'frames',
+        manufacturer: 'Rayban',
+        material: 'Acetate + Kim loại',
+        price: 390000,
+        quantity: 20,
+        minStock: 5,
+        imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400'
+      }
+    }),
+    prisma.product.create({
+      data: {
+        code: 'G010',
+        name: 'Gọng kính Rimless không viền',
+        category: 'frames',
+        manufacturer: 'Silhouette',
+        material: 'Titanium siêu nhẹ',
+        price: 580000,
+        quantity: 12,
+        minStock: 3,
+        imageUrl: 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=400'
+      }
+    }),
+    prisma.product.create({
+      data: {
+        code: 'G011',
+        name: 'Gọng kính Oversized thời trang',
+        category: 'frames',
+        manufacturer: 'Gucci',
+        material: 'Acetate đa màu',
+        price: 650000,
+        quantity: 10,
+        minStock: 3,
+        imageUrl: 'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=400'
+      }
+    }),
+    prisma.product.create({
+      data: {
+        code: 'G012',
+        name: 'Gọng kính thể thao Wrap-around',
+        category: 'frames',
+        manufacturer: 'Oakley',
+        material: 'Nhựa chống va đập',
+        price: 340000,
+        quantity: 25,
+        minStock: 6,
+        imageUrl: 'https://images.unsplash.com/photo-1589782182703-2aaa69037b5b?w=400'
+      }
+    }),
+    prisma.product.create({
+      data: {
+        code: 'G013',
+        name: 'Gọng kính Hexagon lục giác',
+        category: 'frames',
+        manufacturer: 'Gentle Monster',
+        material: 'Kim loại mỏng',
+        price: 460000,
+        quantity: 14,
+        minStock: 4,
+        imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400'
+      }
+    }),
+    prisma.product.create({
+      data: {
+        code: 'G014',
+        name: 'Gọng kính Pilot quân đội',
+        category: 'frames',
+        manufacturer: 'American Optical',
+        material: 'Kim loại mạ crôm',
+        price: 410000,
+        quantity: 17,
+        minStock: 5,
+        imageUrl: 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=400'
+      }
+    }),
+    prisma.product.create({
+      data: {
+        code: 'G015',
+        name: 'Gọng kính Browline sang trọng',
+        category: 'frames',
+        manufacturer: 'Persol',
+        material: 'Acetate + Vàng',
+        price: 530000,
+        quantity: 13,
+        minStock: 4,
+        imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400'
       }
     }),
     

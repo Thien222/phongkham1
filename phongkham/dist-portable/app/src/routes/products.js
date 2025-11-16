@@ -42,17 +42,28 @@ router.get('/alerts/expiring', async (req, res, next) => {
 router.get('/', async (req, res, next) => {
   try {
     const category = req.query.category;
+    const lensCategory = req.query.lensCategory; // don_trong | hai_trong | da_trong
     const q = String(req.query.q ?? '').trim();
+    
+    const whereClause = {};
+    
+    if (category) {
+      whereClause.category = category;
+    }
+    
+    if (lensCategory) {
+      whereClause.lensCategory = lensCategory;
+    }
+    
+    if (q) {
+      whereClause.OR = [
+        { name: { contains: q } },
+        { code: { contains: q } }
+      ];
+    }
+    
     const products = await prisma.product.findMany({ 
-      where: {
-        ...(category ? { category } : {}),
-        ...(q ? {
-          OR: [
-            { name: { contains: q } },
-            { code: { contains: q } }
-          ]
-        } : {})
-      },
+      where: Object.keys(whereClause).length > 0 ? whereClause : undefined,
       orderBy: { createdAt: 'desc' }, 
       take: 200 
     });
@@ -80,21 +91,30 @@ router.get('/:id', async (req, res, next) => {
 // Create product
 router.post('/', async (req, res, next) => {
   try {
-    const { code, name, category, manufacturer, sphRange, cylRange, material, price, quantity, minStock, expiresAt, imageUrl } = req.body ?? {};
+    const { 
+      code, name, category, lensCategory, manufacturer, 
+      sphRange, cylRange, addRange, leftRegion, rightRegion,
+      material, price, quantity, minStock, expiresAt, imageUrl 
+    } = req.body ?? {};
+    
     const created = await prisma.product.create({
       data: { 
         code: code || `PRD${Date.now()}`,
         name, 
         category: category || 'glasses',
-        manufacturer,
-        sphRange,
-        cylRange,
-        material,
+        lensCategory: lensCategory || null,
+        manufacturer: manufacturer || null,
+        sphRange: sphRange || null,
+        cylRange: cylRange || null,
+        addRange: addRange || null,
+        leftRegion: leftRegion || null,
+        rightRegion: rightRegion || null,
+        material: material || null,
         price: Number(price ?? 0), 
         quantity: Number(quantity ?? 0),
         minStock: Number(minStock ?? 5),
         expiresAt: expiresAt ? new Date(expiresAt) : null,
-        imageUrl
+        imageUrl: imageUrl || null
       }
     });
     res.status(201).json(created);
@@ -106,17 +126,32 @@ router.post('/', async (req, res, next) => {
 // Update product
 router.put('/:id', async (req, res, next) => {
   try {
-    const { name, category, manufacturer, sphRange, cylRange, material, price, quantity, minStock, expiresAt, imageUrl } = req.body ?? {};
+    const { 
+      name, category, lensCategory, manufacturer, 
+      sphRange, cylRange, addRange, leftRegion, rightRegion,
+      material, price, quantity, minStock, expiresAt, imageUrl 
+    } = req.body ?? {};
+    
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (category !== undefined) updateData.category = category;
+    if (lensCategory !== undefined) updateData.lensCategory = lensCategory;
+    if (manufacturer !== undefined) updateData.manufacturer = manufacturer;
+    if (sphRange !== undefined) updateData.sphRange = sphRange;
+    if (cylRange !== undefined) updateData.cylRange = cylRange;
+    if (addRange !== undefined) updateData.addRange = addRange;
+    if (leftRegion !== undefined) updateData.leftRegion = leftRegion;
+    if (rightRegion !== undefined) updateData.rightRegion = rightRegion;
+    if (material !== undefined) updateData.material = material;
+    if (price !== undefined) updateData.price = Number(price);
+    if (quantity !== undefined) updateData.quantity = Number(quantity);
+    if (minStock !== undefined) updateData.minStock = Number(minStock);
+    if (expiresAt !== undefined) updateData.expiresAt = expiresAt ? new Date(expiresAt) : null;
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+    
     const updated = await prisma.product.update({
       where: { id: req.params.id },
-      data: { 
-        name, category, manufacturer, sphRange, cylRange, material,
-        price: price !== undefined ? Number(price) : undefined, 
-        quantity: quantity !== undefined ? Number(quantity) : undefined,
-        minStock: minStock !== undefined ? Number(minStock) : undefined,
-        expiresAt: expiresAt ? new Date(expiresAt) : undefined,
-        imageUrl
-      }
+      data: updateData
     });
     res.json(updated);
   } catch (err) {

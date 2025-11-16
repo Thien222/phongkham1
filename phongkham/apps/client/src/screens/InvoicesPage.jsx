@@ -399,7 +399,7 @@ export function InvoicesPage() {
           loading={loading}
           rowKey="id"
           scroll={{ x: 1200 }}
-          pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (total) => `Tổng ${total} hóa đơn` }}
+          pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Tổng ${total} hóa đơn` }}
         />
       </Card>
 

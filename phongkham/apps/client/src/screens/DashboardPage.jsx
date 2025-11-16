@@ -41,45 +41,36 @@ export function DashboardPage() {
       </Typography.Title>
       
       <Row gutter={16}>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
-              title="Tổng bệnh nhân"
-              value={stats?.totalPatients || 0}
-              prefix={<UserOutlined style={{ color: '#1890ff' }} />}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Tổng kho hàng"
-              value={stats?.totalProducts || 0}
-              prefix={<InboxOutlined style={{ color: '#fa8c16' }} />}
-              valueStyle={{ color: '#fa8c16' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Khúc xạ hôm nay"
+              title="Bệnh nhân khúc xạ hôm nay"
               value={stats?.refractionsToday || 0}
               prefix={<EyeOutlined style={{ color: '#52c41a' }} />}
               valueStyle={{ color: '#52c41a' }}
+              suffix="bệnh nhân"
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
-              title="Doanh thu tháng"
-              value={stats?.revenueThisMonth || 0}
-              suffix="đ"
-              prefix={<DollarOutlined style={{ color: '#722ed1' }} />}
-              valueStyle={{ color: '#722ed1' }}
-              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              title="Khám bệnh hôm nay"
+              value={stats?.examinationsToday || 0}
+              prefix={<SolutionOutlined style={{ color: '#1890ff' }} />}
+              valueStyle={{ color: '#1890ff' }}
+              suffix="bệnh nhân"
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={8}>
+          <Card>
+            <Statistic
+              title="Hóa đơn kính hôm nay"
+              value={stats?.invoicesToday || 0}
+              prefix={<InboxOutlined style={{ color: '#fa8c16' }} />}
+              valueStyle={{ color: '#fa8c16' }}
+              suffix="hóa đơn"
             />
           </Card>
         </Col>

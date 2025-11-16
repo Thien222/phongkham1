@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Card, Form, Input, Button, Space, message, Divider, Table, Modal, Upload, Typography, InputNumber, Tag } from 'antd';
-import { SaveOutlined, CloudUploadOutlined, DeleteOutlined, ReloadOutlined, HistoryOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Card, Form, Input, Button, Space, message, Divider, Table, Modal, Upload, Typography, InputNumber, Tag, Tabs } from 'antd';
+import { SaveOutlined, CloudUploadOutlined, DeleteOutlined, ReloadOutlined, HistoryOutlined, ExclamationCircleOutlined, SettingOutlined, FileTextOutlined, PrinterOutlined, LockOutlined, DatabaseOutlined } from '@ant-design/icons';
 import api from '../lib/api';
 import dayjs from 'dayjs';
 
@@ -13,6 +13,7 @@ export function SettingsPage() {
   const [backups, setBackups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('clinic');
 
   useEffect(() => {
     loadSettings();
@@ -30,7 +31,18 @@ export function SettingsPage() {
         taxRate: parseFloat(response.data.taxRate) || 10,
         lowStockThreshold: parseInt(response.data.lowStockThreshold) || 5,
         maxBackups: parseInt(response.data.maxBackups) || 30,
-        backupPath: response.data.backupPath || ''
+        backupPath: response.data.backupPath || '',
+        // Settings phiếu khúc xạ
+        refractionSheetTitle: response.data.refractionSheetTitle || 'PHIẾU KHÚC XẠ',
+        refractionSheetClinicName: response.data.refractionSheetClinicName || 'PHÒNG KHÁM MẮT NGOẠI GIỜ',
+        refractionSheetDoctorName: response.data.refractionSheetDoctorName || 'BSCKII. HỨA TRUNG KIÊN',
+        refractionSheetClinicPhone: response.data.refractionSheetClinicPhone || '0971416421 – 0849274364',
+        refractionSheetWorkingHours: response.data.refractionSheetWorkingHours || 'Từ 8h đến 19h. Thứ hai đến Chủ nhật',
+        refractionSheetClinicAddress: response.data.refractionSheetClinicAddress || '',
+        // Settings phiếu số thứ tự
+        queueTicketClinicName: response.data.queueTicketClinicName || 'PHÒNG KHÁM MẮT NGOẠI GIỜ',
+        queueTicketDoctorName: response.data.queueTicketDoctorName || 'BSCKII. HỨA TRUNG KIÊN',
+        queueTicketNote: response.data.queueTicketNote || 'Khách hàng vui lòng chờ đến STT'
       });
     } catch (error) {
       console.error('Load settings error:', error);
@@ -203,95 +215,234 @@ export function SettingsPage() {
     }
   ];
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      {/* Thông tin phòng khám */}
-      <Card title={<h2 style={{ margin: 0 }}>Thông tin phòng khám</h2>}>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-        >
-          <Form.Item
-            name="clinicName"
-            label="Tên phòng khám"
-            rules={[{ required: true, message: 'Vui lòng nhập tên phòng khám' }]}
-          >
-            <Input />
-          </Form.Item>
+  const tabItems = [
+    {
+      key: 'clinic',
+      label: (
+        <span>
+          <SettingOutlined />
+          Thông tin phòng khám
+        </span>
+      ),
+      children: (
+        <Card>
+          <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            <Form.Item
+              name="clinicName"
+              label="Tên phòng khám"
+              rules={[{ required: true, message: 'Vui lòng nhập tên phòng khám' }]}
+            >
+              <Input />
+            </Form.Item>
 
-          <Form.Item
-            name="clinicAddress"
-            label="Địa chỉ"
-            rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
-          >
-            <Input.TextArea rows={2} />
-          </Form.Item>
+            <Form.Item
+              name="clinicAddress"
+              label="Địa chỉ"
+              rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
+            >
+              <Input.TextArea rows={2} />
+            </Form.Item>
 
-          <Form.Item
-            name="clinicPhone"
-            label="Số điện thoại"
-            rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
-          >
-            <Input />
-          </Form.Item>
+            <Form.Item
+              name="clinicPhone"
+              label="Số điện thoại"
+              rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+            >
+              <Input />
+            </Form.Item>
 
-          <Form.Item
-            name="clinicEmail"
-            label="Email"
-            rules={[
-              { required: true, message: 'Vui lòng nhập email' },
-              { type: 'email', message: 'Email không hợp lệ' }
-            ]}
-          >
-            <Input />
-          </Form.Item>
+            <Form.Item
+              name="clinicEmail"
+              label="Email"
+              rules={[
+                { required: true, message: 'Vui lòng nhập email' },
+                { type: 'email', message: 'Email không hợp lệ' }
+              ]}
+            >
+              <Input />
+            </Form.Item>
 
-          <Divider>Cài đặt hệ thống</Divider>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={loading}>
+                Lưu cài đặt
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      )
+    },
+    {
+      key: 'system',
+      label: (
+        <span>
+          <SettingOutlined />
+          Cài đặt hệ thống
+        </span>
+      ),
+      children: (
+        <Card>
+          <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            <Form.Item
+              name="taxRate"
+              label="Thuế VAT (%)"
+              rules={[{ required: true, message: 'Vui lòng nhập thuế VAT' }]}
+            >
+              <InputNumber min={0} max={100} style={{ width: '100%' }} />
+            </Form.Item>
 
-          <Form.Item
-            name="taxRate"
-            label="Thuế VAT (%)"
-            rules={[{ required: true, message: 'Vui lòng nhập thuế VAT' }]}
-          >
-            <InputNumber min={0} max={100} style={{ width: '100%' }} />
-          </Form.Item>
+            <Form.Item
+              name="lowStockThreshold"
+              label="Ngưỡng cảnh báo tồn kho thấp"
+              rules={[{ required: true, message: 'Vui lòng nhập ngưỡng cảnh báo' }]}
+            >
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
 
-          <Form.Item
-            name="lowStockThreshold"
-            label="Ngưỡng cảnh báo tồn kho thấp"
-            rules={[{ required: true, message: 'Vui lòng nhập ngưỡng cảnh báo' }]}
-          >
-            <InputNumber min={0} style={{ width: '100%' }} />
-          </Form.Item>
+            <Form.Item
+              name="maxBackups"
+              label="Số lượng backup tối đa lưu trữ"
+              rules={[{ required: true, message: 'Vui lòng nhập số lượng backup' }]}
+              tooltip="Hệ thống sẽ tự động xóa các backup cũ khi vượt quá số lượng này"
+            >
+              <InputNumber min={1} max={100} style={{ width: '100%' }} />
+            </Form.Item>
 
-          <Form.Item
-            name="maxBackups"
-            label="Số lượng backup tối đa lưu trữ"
-            rules={[{ required: true, message: 'Vui lòng nhập số lượng backup' }]}
-            tooltip="Hệ thống sẽ tự động xóa các backup cũ khi vượt quá số lượng này"
-          >
-            <InputNumber min={1} max={100} style={{ width: '100%' }} />
-          </Form.Item>
+            <Form.Item
+              name="backupPath"
+              label="Đường dẫn lưu backup"
+              tooltip="Để trống sẽ lưu ở thư mục mặc định (./backups). Nếu nhập đường dẫn tuyệt đối, hãy đảm bảo thư mục tồn tại và có quyền ghi."
+            >
+              <Input placeholder="VD: C:\BackupData\eyeclinic hoặc để trống dùng mặc định" />
+            </Form.Item>
 
-          <Form.Item
-            name="backupPath"
-            label="Đường dẫn lưu backup"
-            tooltip="Để trống sẽ lưu ở thư mục mặc định (./backups). Nếu nhập đường dẫn tuyệt đối, hãy đảm bảo thư mục tồn tại và có quyền ghi."
-          >
-            <Input placeholder="VD: C:\BackupData\eyeclinic hoặc để trống dùng mặc định" />
-          </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={loading}>
+                Lưu cài đặt
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      )
+    },
+    {
+      key: 'refraction',
+      label: (
+        <span>
+          <FileTextOutlined />
+          Phiếu khúc xạ
+        </span>
+      ),
+      children: (
+        <Card>
+          <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            <Form.Item
+              name="refractionSheetTitle"
+              label="Tiêu đề phiếu"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={loading}>
-              Lưu cài đặt
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
+            <Form.Item
+              name="refractionSheetClinicName"
+              label="Tên phòng khám"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
 
-      {/* Đổi mật khẩu Admin */}
-      <Card title={<h2 style={{ margin: 0 }}>Đổi mật khẩu Admin</h2>}>
+            <Form.Item
+              name="refractionSheetDoctorName"
+              label="Tên bác sĩ"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              name="refractionSheetClinicPhone"
+              label="Số điện thoại"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              name="refractionSheetWorkingHours"
+              label="Giờ làm việc"
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              name="refractionSheetClinicAddress"
+              label="Địa chỉ phòng khám"
+            >
+              <Input.TextArea rows={2} />
+            </Form.Item>
+
+            <Form.Item>
+              <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={loading}>
+                Lưu cài đặt
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      )
+    },
+    {
+      key: 'queue',
+      label: (
+        <span>
+          <PrinterOutlined />
+          Phiếu số thứ tự
+        </span>
+      ),
+      children: (
+        <Card>
+          <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            <Form.Item
+              name="queueTicketClinicName"
+              label="Tên phòng khám"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              name="queueTicketDoctorName"
+              label="Tên bác sĩ"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              name="queueTicketNote"
+              label="Ghi chú phiếu"
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item>
+              <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={loading}>
+                Lưu cài đặt
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      )
+    },
+    {
+      key: 'password',
+      label: (
+        <span>
+          <LockOutlined />
+          Đổi mật khẩu
+        </span>
+      ),
+      children: (
+        <Card title={<h2 style={{ margin: 0 }}>Đổi mật khẩu Admin</h2>}>
         <Form
           form={passwordForm}
           layout="vertical"
@@ -330,33 +481,57 @@ export function SettingsPage() {
             </Button>
           </Form.Item>
         </Form>
-      </Card>
+        </Card>
+      )
+    },
+    {
+      key: 'backup',
+      label: (
+        <span>
+          <DatabaseOutlined />
+          Backup & Khôi phục
+        </span>
+      ),
+      children: (
+        <Card 
+          title={<h2 style={{ margin: 0 }}>Backup và Khôi phục Database</h2>}
+          extra={
+            <Button 
+              type="primary" 
+              icon={<CloudUploadOutlined />} 
+              onClick={handleCreateBackup}
+              loading={backupLoading}
+            >
+              Tạo Backup
+            </Button>
+          }
+        >
+          <div style={{ marginBottom: '16px' }}>
+            <Text type="secondary">
+              💡 Hệ thống tự động backup mỗi 4 giờ. Bạn cũng có thể tạo backup thủ công bất kỳ lúc nào.
+            </Text>
+          </div>
+          <Table
+            columns={backupColumns}
+            dataSource={backups}
+            rowKey="fileName"
+            pagination={{ pageSize: 10 }}
+            size="small"
+          />
+        </Card>
+      )
+    }
+  ];
 
-      {/* Backup và Khôi phục */}
-      <Card 
-        title={<h2 style={{ margin: 0 }}>Backup và Khôi phục Database</h2>}
-        extra={
-          <Button 
-            type="primary" 
-            icon={<CloudUploadOutlined />} 
-            onClick={handleCreateBackup}
-            loading={backupLoading}
-          >
-            Tạo Backup
-          </Button>
-        }
-      >
-        <div style={{ marginBottom: '16px' }}>
-          <Text type="secondary">
-            💡 Hệ thống tự động backup mỗi 4 giờ. Bạn cũng có thể tạo backup thủ công bất kỳ lúc nào.
-          </Text>
-        </div>
-        <Table
-          columns={backupColumns}
-          dataSource={backups}
-          rowKey="fileName"
-          pagination={{ pageSize: 10 }}
-          size="small"
+  return (
+    <div>
+      <Card title={<h2 style={{ margin: 0 }}>Cài đặt hệ thống</h2>}>
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={setActiveTab}
+          items={tabItems}
+          type="card"
+          size="large"
         />
       </Card>
     </div>

@@ -71,8 +71,8 @@ export async function deleteExamination(id) {
 }
 
 // Products
-export async function fetchProducts(category, q) {
-  const res = await api.get('/products', { params: { category, q } });
+export async function fetchProducts(category, q, lensCategory) {
+  const res = await api.get('/products', { params: { category, q, lensCategory } });
   return res.data;
 }
 

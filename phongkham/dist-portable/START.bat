@@ -20,25 +20,37 @@ set "DATABASE_URL=file:%DB_PATH%"
 REM Ensure data folder exists
 if not exist "data" mkdir data
 
-REM Copy default database if not exists
-if not exist "%DB_PATH%" (
-    echo.
-    echo Creating default database...
-    cd app
-    "..\nodejs\node.exe" "node_modules\prisma\build\index.js" db push
-    "..\nodejs\node.exe" src\scripts\seed.js
-    cd ..
-)
-
 cd app
 
-echo Checking Prisma Client...
-"..\nodejs\node.exe" "node_modules\prisma\build\index.js" generate
+echo Step 1: Generating Prisma Client...
+"..\nodejs\node.exe" node_modules\prisma\build\index.js generate
 if errorlevel 1 (
     echo.
     echo [ERROR] Failed to generate Prisma Client!
     pause
     exit /b 1
+)
+
+echo.
+echo Step 2: Syncing database schema...
+if not exist "%DB_PATH%" (
+    echo Creating new database...
+    "..\nodejs\node.exe" node_modules\prisma\build\index.js db push --skip-generate
+    if errorlevel 1 (
+        echo [WARNING] Failed to create database, will try again on next run
+    ) else (
+        echo Database created successfully!
+        if exist "src\scripts\seed.js" (
+            echo Seeding initial data...
+            "..\nodejs\node.exe" src\scripts\seed.js
+        )
+    )
+) else (
+    echo Updating database schema...
+    "..\nodejs\node.exe" node_modules\prisma\build\index.js db push --skip-generate
+    if errorlevel 1 (
+        echo [WARNING] Database might be locked or schema already up to date
+    )
 )
 
 echo.

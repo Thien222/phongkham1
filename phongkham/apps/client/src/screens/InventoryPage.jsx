@@ -13,7 +13,8 @@ export function InventoryPage() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('glasses');
+  const [activeTab, setActiveTab] = useState('lenses');
+  const [lensCategoryFilter, setLensCategoryFilter] = useState('');
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export function InventoryPage() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const data = await fetchProducts(activeTab, searchQuery);
+      const data = await fetchProducts(activeTab, searchQuery, lensCategoryFilter);
       setProducts(data);
     } catch (error) {
       message.error('Không thể tải danh sách sản phẩm');
@@ -41,7 +42,7 @@ export function InventoryPage() {
       loadProducts();
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, lensCategoryFilter]);
 
   const handleAdd = () => {
     setSelectedProduct(null);
@@ -131,6 +132,21 @@ export function InventoryPage() {
       title: 'Tên sản phẩm',
       dataIndex: 'name',
       key: 'name',
+    },
+    {
+      title: 'Loại tròng',
+      dataIndex: 'lensCategory',
+      key: 'lensCategory',
+      width: 100,
+      render: (text) => {
+        if (!text) return '-';
+        const map = {
+          'don_trong': 'Đơn tròng',
+          'hai_trong': '2 tròng',
+          'da_trong': 'Đa tròng'
+        };
+        return <Tag color="cyan">{map[text] || text}</Tag>;
+      }
     },
     {
       title: 'Nhà sản xuất',
@@ -227,8 +243,8 @@ export function InventoryPage() {
   const expiredProducts = getExpiredProducts();
 
   const tabItems = [
-    { key: 'glasses', label: 'Tròng kính' },
-    { key: 'lenses', label: 'Gọng kính' },
+    { key: 'lenses', label: 'Tròng kính' },
+    { key: 'frames', label: 'Gọng kính' },
     { key: 'medicine', label: 'Thuốc' }
   ];
 
@@ -302,7 +318,24 @@ export function InventoryPage() {
           </Space>
         }
       >
-        <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} style={{ marginBottom: 16 }} />
+        <Tabs activeKey={activeTab} onChange={(key) => { setActiveTab(key); setLensCategoryFilter(''); }} items={tabItems} style={{ marginBottom: 16 }} />
+        
+        {activeTab === 'lenses' && (
+          <Space style={{ marginBottom: 16 }}>
+            <span>Lọc loại tròng:</span>
+            <Select
+              style={{ width: 150 }}
+              value={lensCategoryFilter}
+              onChange={setLensCategoryFilter}
+              allowClear
+              placeholder="Tất cả"
+            >
+              <Select.Option value="don_trong">Đơn tròng</Select.Option>
+              <Select.Option value="hai_trong">2 tròng</Select.Option>
+              <Select.Option value="da_trong">Đa tròng</Select.Option>
+            </Select>
+          </Space>
+        )}
         
         <Table
           columns={columns}
@@ -311,7 +344,7 @@ export function InventoryPage() {
           rowKey="id"
           scroll={{ x: 1200 }}
           pagination={{ 
-            pageSize: 20, 
+            pageSize: 10, 
             showSizeChanger: true, 
             showTotal: (total) => `Tổng ${total} sản phẩm` 
           }}
@@ -348,8 +381,8 @@ export function InventoryPage() {
                 rules={[{ required: true, message: 'Vui lòng chọn loại sản phẩm' }]}
               >
                 <Select placeholder="Chọn loại sản phẩm">
-                  <Select.Option value="glasses">Tròng kính</Select.Option>
-                  <Select.Option value="lenses">Gọng kính</Select.Option>
+                  <Select.Option value="lenses">Tròng kính</Select.Option>
+                  <Select.Option value="frames">Gọng kính</Select.Option>
                   <Select.Option value="medicine">Thuốc</Select.Option>
                 </Select>
               </Form.Item>
@@ -362,6 +395,28 @@ export function InventoryPage() {
             rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm' }]}
           >
             <Input placeholder="Nhập tên sản phẩm" />
+          </Form.Item>
+
+          <Form.Item
+            noStyle
+            shouldUpdate={(prevValues, currentValues) => prevValues.category !== currentValues.category}
+          >
+            {({ getFieldValue }) => {
+              const category = getFieldValue('category');
+              return category === 'lenses' ? (
+                <Form.Item
+                  name="lensCategory"
+                  label="Loại tròng kính"
+                  rules={[{ required: true, message: 'Vui lòng chọn loại tròng' }]}
+                >
+                  <Select placeholder="Chọn loại tròng">
+                    <Select.Option value="don_trong">Đơn tròng</Select.Option>
+                    <Select.Option value="hai_trong">2 tròng</Select.Option>
+                    <Select.Option value="da_trong">Đa tròng</Select.Option>
+                  </Select>
+                </Form.Item>
+              ) : null;
+            }}
           </Form.Item>
 
           <Row gutter={16}>
@@ -381,63 +436,44 @@ export function InventoryPage() {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="sphRange" label="Tính năng (SPH Range)">
-                <Select
-                  showSearch
-                  allowClear
-                  placeholder="Chọn độ SPH"
-                  filterOption={(input, option) =>
-                    option.value.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  <Select.Option value="Plano">Plano (0.00)</Select.Option>
-                  {(() => {
-                    const options = [];
-                    for (let i = -20; i <= 20; i += 0.25) {
-                      if (i !== 0) { // Skip 0 since we have Plano
-                        const value = i.toFixed(2);
-                        const sign = i > 0 ? '+' : '';
-                        options.push(
-                          <Select.Option key={value} value={sign + value}>
-                            {sign + value}
-                          </Select.Option>
-                        );
-                      }
-                    }
-                    return options;
-                  })()}
-                </Select>
+                <Input placeholder="VD: -10.00 ~ +6.00" />
               </Form.Item>
             </Col>
             
             <Col span={12}>
               <Form.Item name="cylRange" label="Độ loạn (CYL Range)">
-                <Select
-                  showSearch
-                  allowClear
-                  placeholder="Chọn độ CYL"
-                  filterOption={(input, option) =>
-                    option.value.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  <Select.Option value="Plano">Plano (0.00)</Select.Option>
-                  {(() => {
-                    const options = [];
-                    for (let i = -8; i <= 0; i += 0.25) {
-                      if (i !== 0) { // Skip 0 since we have Plano
-                        const value = i.toFixed(2);
-                        options.push(
-                          <Select.Option key={value} value={value}>
-                            {value}
-                          </Select.Option>
-                        );
-                      }
-                    }
-                    return options;
-                  })()}
-                </Select>
+                <Input placeholder="VD: 0 ~ -6.00" />
               </Form.Item>
             </Col>
           </Row>
+
+          <Form.Item
+            noStyle
+            shouldUpdate={(prevValues, currentValues) => prevValues.lensCategory !== currentValues.lensCategory}
+          >
+            {({ getFieldValue }) => {
+              const lensCategory = getFieldValue('lensCategory');
+              return (lensCategory === 'hai_trong' || lensCategory === 'da_trong') ? (
+                <>
+                  <Form.Item name="addRange" label="Độ ADD">
+                    <Input placeholder="VD: +1.00 ~ +3.00" />
+                  </Form.Item>
+                  <Row gutter={16}>
+                    <Col span={12}>
+                      <Form.Item name="leftRegion" label="Miếng bên trái">
+                        <Input placeholder="Mô tả miếng trái" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item name="rightRegion" label="Miếng bên phải">
+                        <Input placeholder="Mô tả miếng phải" />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </>
+              ) : null;
+            }}
+          </Form.Item>
 
           <Row gutter={16}>
             <Col span={8}>

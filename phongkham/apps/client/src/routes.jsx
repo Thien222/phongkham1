@@ -5,6 +5,7 @@ import { RefractionPage } from './screens/RefractionPage';
 import { ExaminationPage } from './screens/ExaminationPage';
 import { InvoicesPage } from './screens/InvoicesPage';
 import { InventoryPage } from './screens/InventoryPage';
+import { HistoryPage } from './screens/HistoryPage';
 import { ReportsPage } from './screens/ReportsPage';
 import { IncidentsPage } from './screens/IncidentsPage';
 import { SettingsPage } from './screens/SettingsPage';
@@ -19,6 +20,7 @@ export function AppRoutes() {
       <Route path="/examination" element={<ExaminationPage />} />
       <Route path="/invoices" element={<InvoicesPage />} />
       <Route path="/inventory" element={<ProtectedRoute requireAdmin><InventoryPage /></ProtectedRoute>} />
+      <Route path="/history" element={<HistoryPage />} />
       <Route path="/reports" element={<ProtectedRoute requireAdmin><ReportsPage /></ProtectedRoute>} />
       <Route path="/incidents" element={<IncidentsPage />} />
       <Route path="/settings" element={<ProtectedRoute requireAdmin><SettingsPage /></ProtectedRoute>} />

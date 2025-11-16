@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, Table, Button, Input, Modal, Form, DatePicker, Select, message, Space, Tag, Checkbox } from 'antd';
-import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined, SoundOutlined } from '@ant-design/icons';
 import { fetchPatients, createPatient, updatePatient, deletePatient } from '../lib/api';
+import { CallAndPrintButton } from '../components/CallAndPrintButton';
 import dayjs from 'dayjs';
 
 const { Search } = Input;
@@ -123,6 +124,13 @@ export function ReceptionPage() {
 
   const columns = [
     {
+      title: 'STT',
+      dataIndex: 'queueNumber',
+      key: 'queueNumber',
+      width: 90,
+      render: (text) => text ? <Tag color="red" style={{ fontWeight: 'bold', fontSize: '13px' }}>{text}</Tag> : '-'
+    },
+    {
       title: 'Mã BN',
       dataIndex: 'code',
       key: 'code',
@@ -212,6 +220,16 @@ export function ReceptionPage() {
       fixed: 'right',
       render: (_, record) => (
         <Space size="small">
+          {record.queueNumber && record.visitStatus === 'waiting' && (
+            <CallAndPrintButton 
+              patient={record}
+              destination="khám"
+              size="small"
+              type="primary"
+              ghost
+              onSuccess={loadPatients}
+            />
+          )}
           <Button 
             icon={<EyeOutlined />} 
             size="small" 
@@ -258,7 +276,7 @@ export function ReceptionPage() {
           loading={loading}
           rowKey="id"
           scroll={{ x: 1000 }}
-          pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (total) => `Tổng ${total} bệnh nhân` }}
+          pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Tổng ${total} bệnh nhân` }}
         />
       </Card>
 
@@ -332,6 +350,54 @@ export function ReceptionPage() {
             </Checkbox.Group>
           </Form.Item>
 
+          <Card title="Thị lực ban đầu" size="small" style={{ marginBottom: 16 }}>
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Form.Item
+                name="initialVaOd"
+                label="Thị lực mắt phải (OD)"
+                style={{ marginBottom: 8 }}
+              >
+                <Input placeholder="Ví dụ: 10/10, 5/10, ..." />
+              </Form.Item>
+
+              <Form.Item
+                name="initialVaOs"
+                label="Thị lực mắt trái (OS)"
+                style={{ marginBottom: 8 }}
+              >
+                <Input placeholder="Ví dụ: 10/10, 5/10, ..." />
+              </Form.Item>
+
+              <Form.Item
+                name="hasGlasses"
+                valuePropName="checked"
+                style={{ marginBottom: 0 }}
+              >
+                <Checkbox>Có đeo kính</Checkbox>
+              </Form.Item>
+            </Space>
+          </Card>
+
+          <Form.Item
+            name="visitReason"
+            label="Lý do đến khám"
+          >
+            <Input.TextArea 
+              rows={2} 
+              placeholder="Ví dụ: Đau mắt, nhìn mờ, khó chịu, ..." 
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="notes"
+            label="Ghi chú"
+          >
+            <Input.TextArea 
+              rows={2} 
+              placeholder="Ghi chú thêm (nếu có)" 
+            />
+          </Form.Item>
+
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
             <Space>
               <Button onClick={() => setModalVisible(false)}>Hủy</Button>
@@ -354,12 +420,20 @@ export function ReceptionPage() {
       >
         {selectedPatient && (
           <div style={{ lineHeight: 2 }}>
+            <p><strong>Mã số thứ tự:</strong> {selectedPatient.queueNumber || '-'}</p>
             <p><strong>Mã bệnh nhân:</strong> {selectedPatient.code}</p>
             <p><strong>Họ tên:</strong> {selectedPatient.fullName}</p>
             <p><strong>Giới tính:</strong> {selectedPatient.gender === 'male' ? 'Nam' : selectedPatient.gender === 'female' ? 'Nữ' : 'Khác'}</p>
             <p><strong>Số điện thoại:</strong> {selectedPatient.phone || '-'}</p>
             <p><strong>Ngày sinh:</strong> {selectedPatient.birthDate ? dayjs(selectedPatient.birthDate).format('DD/MM/YYYY') : '-'}</p>
             <p><strong>Địa chỉ:</strong> {selectedPatient.address || '-'}</p>
+            <Card size="small" title="Thị lực ban đầu" style={{ marginTop: 12, marginBottom: 12 }}>
+              <p><strong>Mắt phải (OD):</strong> {selectedPatient.initialVaOd || '-'}</p>
+              <p><strong>Mắt trái (OS):</strong> {selectedPatient.initialVaOs || '-'}</p>
+              <p><strong>Có đeo kính:</strong> {selectedPatient.hasGlasses ? 'Có' : 'Không'}</p>
+            </Card>
+            <p><strong>Lý do đến khám:</strong> {selectedPatient.visitReason || '-'}</p>
+            <p><strong>Ghi chú:</strong> {selectedPatient.notes || '-'}</p>
             <p><strong>Ngày đăng ký:</strong> {dayjs(selectedPatient.createdAt).format('DD/MM/YYYY HH:mm')}</p>
             {selectedPatient._count && (
               <>

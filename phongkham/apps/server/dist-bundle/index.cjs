@@ -1291,8 +1291,8 @@ var require_node = __commonJS({
           }
           break;
         case "FILE":
-          var fs3 = require("fs");
-          stream2 = new fs3.SyncWriteStream(fd2, { autoClose: false });
+          var fs4 = require("fs");
+          stream2 = new fs4.SyncWriteStream(fd2, { autoClose: false });
           stream2._type = "fs";
           break;
         case "PIPE":
@@ -17510,8 +17510,8 @@ var require_node2 = __commonJS({
           }
           break;
         case "FILE":
-          var fs3 = require("fs");
-          stream2 = new fs3.SyncWriteStream(fd2, { autoClose: false });
+          var fs4 = require("fs");
+          stream2 = new fs4.SyncWriteStream(fd2, { autoClose: false });
           stream2._type = "fs";
           break;
         case "PIPE":
@@ -18223,8 +18223,8 @@ var require_node3 = __commonJS({
           }
           break;
         case "FILE":
-          var fs3 = require("fs");
-          stream2 = new fs3.SyncWriteStream(fd2, { autoClose: false });
+          var fs4 = require("fs");
+          stream2 = new fs4.SyncWriteStream(fd2, { autoClose: false });
           stream2._type = "fs";
           break;
         case "PIPE":
@@ -19116,7 +19116,7 @@ var require_view = __commonJS({
     "use strict";
     var debug = require_src3()("express:view");
     var path4 = require("path");
-    var fs3 = require("fs");
+    var fs4 = require("fs");
     var dirname = path4.dirname;
     var basename = path4.basename;
     var extname = path4.extname;
@@ -19182,7 +19182,7 @@ var require_view = __commonJS({
     function tryStat(path5) {
       debug('stat "%s"', path5);
       try {
-        return fs3.statSync(path5);
+        return fs4.statSync(path5);
       } catch (e) {
         return void 0;
       }
@@ -19787,8 +19787,8 @@ var require_node4 = __commonJS({
           }
           break;
         case "FILE":
-          var fs3 = require("fs");
-          stream2 = new fs3.SyncWriteStream(fd2, { autoClose: false });
+          var fs4 = require("fs");
+          stream2 = new fs4.SyncWriteStream(fd2, { autoClose: false });
           stream2._type = "fs";
           break;
         case "PIPE":
@@ -19975,7 +19975,7 @@ var require_types = __commonJS({
 var require_mime = __commonJS({
   "../../node_modules/mime/mime.js"(exports2, module2) {
     var path4 = require("path");
-    var fs3 = require("fs");
+    var fs4 = require("fs");
     function Mime() {
       this.types = /* @__PURE__ */ Object.create(null);
       this.extensions = /* @__PURE__ */ Object.create(null);
@@ -19996,7 +19996,7 @@ var require_mime = __commonJS({
     };
     Mime.prototype.load = function(file) {
       this._loading = file;
-      var map = {}, content = fs3.readFileSync(file, "ascii"), lines = content.split(/[\r\n]+/);
+      var map = {}, content = fs4.readFileSync(file, "ascii"), lines = content.split(/[\r\n]+/);
       lines.forEach(function(line) {
         var fields = line.replace(/\s*#.*|^\s*|\s*$/g, "").split(/\s+/);
         map[fields.shift()] = fields;
@@ -20234,7 +20234,7 @@ var require_send = __commonJS({
     var escapeHtml = require_escape_html();
     var etag = require_etag();
     var fresh = require_fresh();
-    var fs3 = require("fs");
+    var fs4 = require("fs");
     var mime = require_mime();
     var ms = require_ms5();
     var onFinished = require_on_finished();
@@ -20567,7 +20567,7 @@ var require_send = __commonJS({
       var i = 0;
       var self2 = this;
       debug('stat "%s"', path5);
-      fs3.stat(path5, function onstat(err, stat) {
+      fs4.stat(path5, function onstat(err, stat) {
         if (err && err.code === "ENOENT" && !extname(path5) && path5[path5.length - 1] !== sep) {
           return next(err);
         }
@@ -20582,7 +20582,7 @@ var require_send = __commonJS({
         }
         var p = path5 + "." + self2._extensions[i++];
         debug('stat "%s"', p);
-        fs3.stat(p, function(err2, stat) {
+        fs4.stat(p, function(err2, stat) {
           if (err2) return next(err2);
           if (stat.isDirectory()) return next();
           self2.emit("file", p, stat);
@@ -20600,7 +20600,7 @@ var require_send = __commonJS({
         }
         var p = join(path5, self2._index[i]);
         debug('stat "%s"', p);
-        fs3.stat(p, function(err2, stat) {
+        fs4.stat(p, function(err2, stat) {
           if (err2) return next(err2);
           if (stat.isDirectory()) return next();
           self2.emit("file", p, stat);
@@ -20612,7 +20612,7 @@ var require_send = __commonJS({
     SendStream.prototype.stream = function stream(path5, options) {
       var self2 = this;
       var res = this.res;
-      var stream2 = fs3.createReadStream(path5, options);
+      var stream2 = fs4.createReadStream(path5, options);
       this.emit("stream", stream2);
       stream2.pipe(res);
       function cleanup() {
@@ -24080,7 +24080,7 @@ var require_package = __commonJS({
 // ../../node_modules/dotenv/lib/main.js
 var require_main = __commonJS({
   "../../node_modules/dotenv/lib/main.js"(exports2, module2) {
-    var fs3 = require("fs");
+    var fs4 = require("fs");
     var path4 = require("path");
     var os = require("os");
     var crypto2 = require("crypto");
@@ -24189,7 +24189,7 @@ var require_main = __commonJS({
       if (options && options.path && options.path.length > 0) {
         if (Array.isArray(options.path)) {
           for (const filepath of options.path) {
-            if (fs3.existsSync(filepath)) {
+            if (fs4.existsSync(filepath)) {
               possibleVaultPath = filepath.endsWith(".vault") ? filepath : `${filepath}.vault`;
             }
           }
@@ -24199,7 +24199,7 @@ var require_main = __commonJS({
       } else {
         possibleVaultPath = path4.resolve(process.cwd(), ".env.vault");
       }
-      if (fs3.existsSync(possibleVaultPath)) {
+      if (fs4.existsSync(possibleVaultPath)) {
         return possibleVaultPath;
       }
       return null;
@@ -24248,7 +24248,7 @@ var require_main = __commonJS({
       const parsedAll = {};
       for (const path5 of optionPaths) {
         try {
-          const parsed = DotenvModule.parse(fs3.readFileSync(path5, { encoding }));
+          const parsed = DotenvModule.parse(fs4.readFileSync(path5, { encoding }));
           DotenvModule.populate(parsedAll, parsed, options);
         } catch (e) {
           if (debug) {
@@ -24849,8 +24849,8 @@ var require_node5 = __commonJS({
           }
           break;
         case "FILE":
-          var fs3 = require("fs");
-          stream2 = new fs3.SyncWriteStream(fd2, { autoClose: false });
+          var fs4 = require("fs");
+          stream2 = new fs4.SyncWriteStream(fd2, { autoClose: false });
           stream2._type = "fs";
           break;
         case "PIPE":
@@ -41946,7 +41946,7 @@ var require_state_machine = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.StateMachine = void 0;
-    var fs3 = require("fs/promises");
+    var fs4 = require("fs/promises");
     var net = require("net");
     var tls = require("tls");
     var bson_1 = require_bson2();
@@ -42233,11 +42233,11 @@ var require_state_machine = __commonJS({
           options.secureContext = tlsOptions.secureContext;
         }
         if (tlsOptions.tlsCertificateKeyFile) {
-          const cert = await fs3.readFile(tlsOptions.tlsCertificateKeyFile);
+          const cert = await fs4.readFile(tlsOptions.tlsCertificateKeyFile);
           options.cert = options.key = cert;
         }
         if (tlsOptions.tlsCAFile) {
-          options.ca = await fs3.readFile(tlsOptions.tlsCAFile);
+          options.ca = await fs4.readFile(tlsOptions.tlsCAFile);
         }
         if (tlsOptions.tlsCertificateKeyFilePassword) {
           options.passphrase = tlsOptions.tlsCertificateKeyFilePassword;
@@ -50160,7 +50160,7 @@ var require_token_machine_workflow = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.callback = void 0;
-    var fs3 = require("fs");
+    var fs4 = require("fs");
     var error_1 = require_error();
     var TOKEN_MISSING_ERROR = "OIDC_TOKEN_FILE must be set in the environment.";
     var callback = async () => {
@@ -50168,7 +50168,7 @@ var require_token_machine_workflow = __commonJS({
       if (!tokenFile) {
         throw new error_1.MongoAWSError(TOKEN_MISSING_ERROR);
       }
-      const token = await fs3.promises.readFile(tokenFile, "utf8");
+      const token = await fs4.promises.readFile(tokenFile, "utf8");
       return { accessToken: token };
     };
     exports2.callback = callback;
@@ -90697,16 +90697,17 @@ var require_mongoose2 = __commonJS({
 });
 
 // src/index.js
-var import_express11 = __toESM(require_express2());
-var import_cors = __toESM(require_lib3());
-var import_dotenv = __toESM(require_main());
-var import_morgan = __toESM(require_morgan());
-var import_mongoose = __toESM(require_mongoose2());
-var import_path3 = __toESM(require("path"));
+var import_express11 = __toESM(require_express2(), 1);
+var import_cors = __toESM(require_lib3(), 1);
+var import_dotenv = __toESM(require_main(), 1);
+var import_morgan = __toESM(require_morgan(), 1);
+var import_mongoose = __toESM(require_mongoose2(), 1);
+var import_path3 = __toESM(require("path"), 1);
+var import_fs3 = __toESM(require("fs"), 1);
 var import_url3 = require("url");
 
 // src/routes/patients.js
-var import_express = __toESM(require_express2());
+var import_express = __toESM(require_express2(), 1);
 
 // src/db.js
 var import_client = require("@prisma/client");
@@ -90787,19 +90788,46 @@ router.get("/:id", async (req, res, next) => {
 });
 router.post("/", async (req, res, next) => {
   try {
-    const { fullName, phone, gender, birthDate, address, visitPurpose, visitStatus } = req.body ?? {};
+    const {
+      fullName,
+      phone,
+      gender,
+      birthDate,
+      address,
+      visitPurpose,
+      visitStatus,
+      initialVaOd,
+      initialVaOs,
+      hasGlasses,
+      visitReason,
+      notes
+    } = req.body ?? {};
     const count = await db_default.patient.count();
     const code = `BN${String(count + 1).padStart(12, "0")}`;
+    const today = /* @__PURE__ */ new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayPatients = await db_default.patient.count({
+      where: {
+        createdAt: { gte: today }
+      }
+    });
+    const queueNumber = `STT${String(todayPatients + 1).padStart(3, "0")}`;
     const created = await db_default.patient.create({
       data: {
         code,
+        queueNumber,
         fullName,
         phone: phone || null,
         gender,
         birthDate: birthDate ? new Date(birthDate) : null,
         address,
         visitPurpose: visitPurpose || "both",
-        visitStatus: visitStatus || "waiting"
+        visitStatus: visitStatus || "waiting",
+        initialVaOd: initialVaOd || null,
+        initialVaOs: initialVaOs || null,
+        hasGlasses: hasGlasses || false,
+        visitReason: visitReason || null,
+        notes: notes || null
       }
     });
     res.status(201).json(created);
@@ -90809,18 +90837,36 @@ router.post("/", async (req, res, next) => {
 });
 router.put("/:id", async (req, res, next) => {
   try {
-    const { fullName, phone, gender, birthDate, address, visitPurpose, visitStatus } = req.body ?? {};
+    const {
+      fullName,
+      phone,
+      gender,
+      birthDate,
+      address,
+      visitPurpose,
+      visitStatus,
+      initialVaOd,
+      initialVaOs,
+      hasGlasses,
+      visitReason,
+      notes
+    } = req.body ?? {};
+    const updateData = {};
+    if (fullName !== void 0) updateData.fullName = fullName;
+    if (phone !== void 0) updateData.phone = phone;
+    if (gender !== void 0) updateData.gender = gender;
+    if (birthDate !== void 0) updateData.birthDate = birthDate ? new Date(birthDate) : null;
+    if (address !== void 0) updateData.address = address;
+    if (visitPurpose !== void 0) updateData.visitPurpose = visitPurpose;
+    if (visitStatus !== void 0) updateData.visitStatus = visitStatus;
+    if (initialVaOd !== void 0) updateData.initialVaOd = initialVaOd;
+    if (initialVaOs !== void 0) updateData.initialVaOs = initialVaOs;
+    if (hasGlasses !== void 0) updateData.hasGlasses = hasGlasses;
+    if (visitReason !== void 0) updateData.visitReason = visitReason;
+    if (notes !== void 0) updateData.notes = notes;
     const updated = await db_default.patient.update({
       where: { id: req.params.id },
-      data: {
-        fullName,
-        phone,
-        gender,
-        birthDate: birthDate ? new Date(birthDate) : null,
-        address,
-        visitPurpose,
-        visitStatus
-      }
+      data: updateData
     });
     res.json(updated);
   } catch (err) {
@@ -90873,7 +90919,7 @@ router.delete("/:id", async (req, res, next) => {
 var patients_default = router;
 
 // src/routes/refractions.js
-var import_express2 = __toESM(require_express2());
+var import_express2 = __toESM(require_express2(), 1);
 var router2 = (0, import_express2.Router)();
 router2.get("/", async (req, res, next) => {
   try {
@@ -90905,10 +90951,64 @@ router2.get("/:id", async (req, res, next) => {
 });
 router2.post("/", async (req, res, next) => {
   try {
-    const { patientId, odSph, odCyl, odAxis, odVa, osSph, osCyl, osAxis, osVa, examDate, notes } = req.body ?? {};
+    const {
+      patientId,
+      // Skiascopy (khúc xạ khách quan)
+      skiasOdSph,
+      skiasOdCyl,
+      skiasOdAxis,
+      skiasOsSph,
+      skiasOsCyl,
+      skiasOsAxis,
+      hasCycloplegia,
+      // Subjective (khúc xạ chủ quan)
+      subjOdSph,
+      subjOdCyl,
+      subjOdAxis,
+      subjOdVa,
+      subjOsSph,
+      subjOsCyl,
+      subjOsAxis,
+      subjOsVa,
+      // Prescription (kính điều chỉnh)
+      odSph,
+      odCyl,
+      odAxis,
+      odVa,
+      osSph,
+      osCyl,
+      osAxis,
+      osVa,
+      // Additional fields
+      odAdd,
+      osAdd,
+      pd,
+      lensType,
+      examDate,
+      notes,
+      signature
+    } = req.body ?? {};
     const created = await db_default.refraction.create({
       data: {
         patientId,
+        // Skiascopy
+        skiasOdSph: skiasOdSph ?? null,
+        skiasOdCyl: skiasOdCyl ?? null,
+        skiasOdAxis: skiasOdAxis ?? null,
+        skiasOsSph: skiasOsSph ?? null,
+        skiasOsCyl: skiasOsCyl ?? null,
+        skiasOsAxis: skiasOsAxis ?? null,
+        hasCycloplegia: hasCycloplegia ?? false,
+        // Subjective
+        subjOdSph: subjOdSph ?? null,
+        subjOdCyl: subjOdCyl ?? null,
+        subjOdAxis: subjOdAxis ?? null,
+        subjOdVa: subjOdVa ?? null,
+        subjOsSph: subjOsSph ?? null,
+        subjOsCyl: subjOsCyl ?? null,
+        subjOsAxis: subjOsAxis ?? null,
+        subjOsVa: subjOsVa ?? null,
+        // Prescription
         odSph: odSph ?? null,
         odCyl: odCyl ?? null,
         odAxis: odAxis ?? null,
@@ -90917,8 +91017,14 @@ router2.post("/", async (req, res, next) => {
         osCyl: osCyl ?? null,
         osAxis: osAxis ?? null,
         osVa: osVa ?? null,
+        // Additional
+        odAdd: odAdd ?? null,
+        osAdd: osAdd ?? null,
+        pd: pd ?? null,
+        lensType: lensType ?? null,
         examDate: examDate ? new Date(examDate) : /* @__PURE__ */ new Date(),
-        notes: notes ?? null
+        notes: notes ?? null,
+        signature: signature ?? null
       },
       include: { patient: true }
     });
@@ -90929,21 +91035,76 @@ router2.post("/", async (req, res, next) => {
 });
 router2.put("/:id", async (req, res, next) => {
   try {
-    const { odSph, odCyl, odAxis, odVa, osSph, osCyl, osAxis, osVa, examDate, notes } = req.body ?? {};
+    const {
+      // Skiascopy
+      skiasOdSph,
+      skiasOdCyl,
+      skiasOdAxis,
+      skiasOsSph,
+      skiasOsCyl,
+      skiasOsAxis,
+      hasCycloplegia,
+      // Subjective
+      subjOdSph,
+      subjOdCyl,
+      subjOdAxis,
+      subjOdVa,
+      subjOsSph,
+      subjOsCyl,
+      subjOsAxis,
+      subjOsVa,
+      // Prescription
+      odSph,
+      odCyl,
+      odAxis,
+      odVa,
+      osSph,
+      osCyl,
+      osAxis,
+      osVa,
+      // Additional
+      odAdd,
+      osAdd,
+      pd,
+      lensType,
+      examDate,
+      notes,
+      signature
+    } = req.body ?? {};
+    const updateData = {};
+    if (skiasOdSph !== void 0) updateData.skiasOdSph = skiasOdSph;
+    if (skiasOdCyl !== void 0) updateData.skiasOdCyl = skiasOdCyl;
+    if (skiasOdAxis !== void 0) updateData.skiasOdAxis = skiasOdAxis;
+    if (skiasOsSph !== void 0) updateData.skiasOsSph = skiasOsSph;
+    if (skiasOsCyl !== void 0) updateData.skiasOsCyl = skiasOsCyl;
+    if (skiasOsAxis !== void 0) updateData.skiasOsAxis = skiasOsAxis;
+    if (hasCycloplegia !== void 0) updateData.hasCycloplegia = hasCycloplegia;
+    if (subjOdSph !== void 0) updateData.subjOdSph = subjOdSph;
+    if (subjOdCyl !== void 0) updateData.subjOdCyl = subjOdCyl;
+    if (subjOdAxis !== void 0) updateData.subjOdAxis = subjOdAxis;
+    if (subjOdVa !== void 0) updateData.subjOdVa = subjOdVa;
+    if (subjOsSph !== void 0) updateData.subjOsSph = subjOsSph;
+    if (subjOsCyl !== void 0) updateData.subjOsCyl = subjOsCyl;
+    if (subjOsAxis !== void 0) updateData.subjOsAxis = subjOsAxis;
+    if (subjOsVa !== void 0) updateData.subjOsVa = subjOsVa;
+    if (odSph !== void 0) updateData.odSph = odSph;
+    if (odCyl !== void 0) updateData.odCyl = odCyl;
+    if (odAxis !== void 0) updateData.odAxis = odAxis;
+    if (odVa !== void 0) updateData.odVa = odVa;
+    if (osSph !== void 0) updateData.osSph = osSph;
+    if (osCyl !== void 0) updateData.osCyl = osCyl;
+    if (osAxis !== void 0) updateData.osAxis = osAxis;
+    if (osVa !== void 0) updateData.osVa = osVa;
+    if (odAdd !== void 0) updateData.odAdd = odAdd;
+    if (osAdd !== void 0) updateData.osAdd = osAdd;
+    if (pd !== void 0) updateData.pd = pd;
+    if (lensType !== void 0) updateData.lensType = lensType;
+    if (examDate !== void 0) updateData.examDate = examDate ? new Date(examDate) : null;
+    if (notes !== void 0) updateData.notes = notes;
+    if (signature !== void 0) updateData.signature = signature;
     const updated = await db_default.refraction.update({
       where: { id: req.params.id },
-      data: {
-        odSph,
-        odCyl,
-        odAxis,
-        odVa,
-        osSph,
-        osCyl,
-        osAxis,
-        osVa,
-        examDate: examDate ? new Date(examDate) : void 0,
-        notes
-      },
+      data: updateData,
       include: { patient: true }
     });
     res.json(updated);
@@ -90962,7 +91123,7 @@ router2.delete("/:id", async (req, res, next) => {
 var refractions_default = router2;
 
 // src/routes/products.js
-var import_express3 = __toESM(require_express2());
+var import_express3 = __toESM(require_express2(), 1);
 var router3 = (0, import_express3.Router)();
 router3.get("/alerts/low-stock", async (req, res, next) => {
   try {
@@ -90996,17 +91157,23 @@ router3.get("/alerts/expiring", async (req, res, next) => {
 router3.get("/", async (req, res, next) => {
   try {
     const category = req.query.category;
+    const lensCategory = req.query.lensCategory;
     const q = String(req.query.q ?? "").trim();
+    const whereClause = {};
+    if (category) {
+      whereClause.category = category;
+    }
+    if (lensCategory) {
+      whereClause.lensCategory = lensCategory;
+    }
+    if (q) {
+      whereClause.OR = [
+        { name: { contains: q } },
+        { code: { contains: q } }
+      ];
+    }
     const products = await db_default.product.findMany({
-      where: {
-        ...category ? { category } : {},
-        ...q ? {
-          OR: [
-            { name: { contains: q } },
-            { code: { contains: q } }
-          ]
-        } : {}
-      },
+      where: Object.keys(whereClause).length > 0 ? whereClause : void 0,
       orderBy: { createdAt: "desc" },
       take: 200
     });
@@ -91030,21 +91197,42 @@ router3.get("/:id", async (req, res, next) => {
 });
 router3.post("/", async (req, res, next) => {
   try {
-    const { code, name, category, manufacturer, sphRange, cylRange, material, price, quantity, minStock, expiresAt, imageUrl } = req.body ?? {};
+    const {
+      code,
+      name,
+      category,
+      lensCategory,
+      manufacturer,
+      sphRange,
+      cylRange,
+      addRange,
+      leftRegion,
+      rightRegion,
+      material,
+      price,
+      quantity,
+      minStock,
+      expiresAt,
+      imageUrl
+    } = req.body ?? {};
     const created = await db_default.product.create({
       data: {
         code: code || `PRD${Date.now()}`,
         name,
         category: category || "glasses",
-        manufacturer,
-        sphRange,
-        cylRange,
-        material,
+        lensCategory: lensCategory || null,
+        manufacturer: manufacturer || null,
+        sphRange: sphRange || null,
+        cylRange: cylRange || null,
+        addRange: addRange || null,
+        leftRegion: leftRegion || null,
+        rightRegion: rightRegion || null,
+        material: material || null,
         price: Number(price ?? 0),
         quantity: Number(quantity ?? 0),
         minStock: Number(minStock ?? 5),
         expiresAt: expiresAt ? new Date(expiresAt) : null,
-        imageUrl
+        imageUrl: imageUrl || null
       }
     });
     res.status(201).json(created);
@@ -91054,22 +91242,42 @@ router3.post("/", async (req, res, next) => {
 });
 router3.put("/:id", async (req, res, next) => {
   try {
-    const { name, category, manufacturer, sphRange, cylRange, material, price, quantity, minStock, expiresAt, imageUrl } = req.body ?? {};
+    const {
+      name,
+      category,
+      lensCategory,
+      manufacturer,
+      sphRange,
+      cylRange,
+      addRange,
+      leftRegion,
+      rightRegion,
+      material,
+      price,
+      quantity,
+      minStock,
+      expiresAt,
+      imageUrl
+    } = req.body ?? {};
+    const updateData = {};
+    if (name !== void 0) updateData.name = name;
+    if (category !== void 0) updateData.category = category;
+    if (lensCategory !== void 0) updateData.lensCategory = lensCategory;
+    if (manufacturer !== void 0) updateData.manufacturer = manufacturer;
+    if (sphRange !== void 0) updateData.sphRange = sphRange;
+    if (cylRange !== void 0) updateData.cylRange = cylRange;
+    if (addRange !== void 0) updateData.addRange = addRange;
+    if (leftRegion !== void 0) updateData.leftRegion = leftRegion;
+    if (rightRegion !== void 0) updateData.rightRegion = rightRegion;
+    if (material !== void 0) updateData.material = material;
+    if (price !== void 0) updateData.price = Number(price);
+    if (quantity !== void 0) updateData.quantity = Number(quantity);
+    if (minStock !== void 0) updateData.minStock = Number(minStock);
+    if (expiresAt !== void 0) updateData.expiresAt = expiresAt ? new Date(expiresAt) : null;
+    if (imageUrl !== void 0) updateData.imageUrl = imageUrl;
     const updated = await db_default.product.update({
       where: { id: req.params.id },
-      data: {
-        name,
-        category,
-        manufacturer,
-        sphRange,
-        cylRange,
-        material,
-        price: price !== void 0 ? Number(price) : void 0,
-        quantity: quantity !== void 0 ? Number(quantity) : void 0,
-        minStock: minStock !== void 0 ? Number(minStock) : void 0,
-        expiresAt: expiresAt ? new Date(expiresAt) : void 0,
-        imageUrl
-      }
+      data: updateData
     });
     res.json(updated);
   } catch (err) {
@@ -91087,7 +91295,7 @@ router3.delete("/:id", async (req, res, next) => {
 var products_default = router3;
 
 // src/routes/invoices.js
-var import_express4 = __toESM(require_express2());
+var import_express4 = __toESM(require_express2(), 1);
 var router4 = (0, import_express4.Router)();
 router4.get("/", async (req, res, next) => {
   try {
@@ -91239,7 +91447,7 @@ router4.delete("/:id", async (req, res, next) => {
 var invoices_default = router4;
 
 // src/routes/examinations.js
-var import_express5 = __toESM(require_express2());
+var import_express5 = __toESM(require_express2(), 1);
 var router5 = (0, import_express5.Router)();
 router5.get("/", async (req, res, next) => {
   try {
@@ -91318,7 +91526,7 @@ router5.delete("/:id", async (req, res, next) => {
 var examinations_default = router5;
 
 // src/routes/stats.js
-var import_express6 = __toESM(require_express2());
+var import_express6 = __toESM(require_express2(), 1);
 var router6 = (0, import_express6.Router)();
 router6.get("/dashboard", async (req, res, next) => {
   try {
@@ -91332,6 +91540,23 @@ router6.get("/dashboard", async (req, res, next) => {
     const totalProducts = await db_default.product.count();
     const refractionsToday = await db_default.refraction.count({
       where: {
+        createdAt: {
+          gte: today,
+          lt: tomorrow
+        }
+      }
+    });
+    const examinationsToday = await db_default.examination.count({
+      where: {
+        createdAt: {
+          gte: today,
+          lt: tomorrow
+        }
+      }
+    });
+    const invoicesToday = await db_default.invoice.count({
+      where: {
+        type: "glasses",
         createdAt: {
           gte: today,
           lt: tomorrow
@@ -91363,6 +91588,8 @@ router6.get("/dashboard", async (req, res, next) => {
       totalPatients,
       totalProducts,
       refractionsToday,
+      examinationsToday,
+      invoicesToday,
       revenueThisMonth,
       recentPatients,
       recentRefractions
@@ -91415,7 +91642,7 @@ router6.get("/products/categories", async (req, res, next) => {
 var stats_default = router6;
 
 // src/routes/vouchers.js
-var import_express7 = __toESM(require_express2());
+var import_express7 = __toESM(require_express2(), 1);
 var router7 = (0, import_express7.Router)();
 router7.get("/", async (req, res, next) => {
   try {
@@ -91528,8 +91755,8 @@ router7.delete("/:id", async (req, res, next) => {
 var vouchers_default = router7;
 
 // src/routes/auth.js
-var import_express8 = __toESM(require_express2());
-var import_crypto = __toESM(require("crypto"));
+var import_express8 = __toESM(require_express2(), 1);
+var import_crypto = __toESM(require("crypto"), 1);
 var router8 = import_express8.default.Router();
 function hashPassword(password) {
   return import_crypto.default.createHash("sha256").update(password).digest("hex");
@@ -91608,9 +91835,9 @@ router8.get("/users", async (req, res) => {
 var auth_default = router8;
 
 // src/routes/backup.js
-var import_express9 = __toESM(require_express2());
-var import_fs = __toESM(require("fs"));
-var import_path = __toESM(require("path"));
+var import_express9 = __toESM(require_express2(), 1);
+var import_fs = __toESM(require("fs"), 1);
+var import_path = __toESM(require("path"), 1);
 var import_url = require("url");
 var import_meta = {};
 var __filename = (0, import_url.fileURLToPath)(import_meta.url);
@@ -91761,7 +91988,7 @@ function cleanOldBackups(backupDir, keepCount) {
 var backup_default = router9;
 
 // src/routes/settings.js
-var import_express10 = __toESM(require_express2());
+var import_express10 = __toESM(require_express2(), 1);
 var router10 = import_express10.default.Router();
 router10.get("/", async (req, res) => {
   try {
@@ -91795,8 +92022,8 @@ router10.put("/", async (req, res) => {
 var settings_default = router10;
 
 // src/scripts/backup.js
-var import_fs2 = __toESM(require("fs"));
-var import_path2 = __toESM(require("path"));
+var import_fs2 = __toESM(require("fs"), 1);
+var import_path2 = __toESM(require("path"), 1);
 var import_url2 = require("url");
 var import_meta2 = {};
 var __filename2 = (0, import_url2.fileURLToPath)(import_meta2.url);
@@ -91881,11 +92108,28 @@ app.use("/api/vouchers", vouchers_default);
 app.use("/api/auth", auth_default);
 app.use("/api/backup", backup_default);
 app.use("/api/settings", settings_default);
-var clientDistPath = import_path3.default.join(__dirname3, "../../client/dist");
-app.use(import_express11.default.static(clientDistPath));
+var portableClientPath = import_path3.default.join(__dirname3, "../client-dist");
+var devClientPath = import_path3.default.join(__dirname3, "../../client/dist");
+var finalClientPath;
+if (import_fs3.default.existsSync(import_path3.default.join(portableClientPath, "index.html"))) {
+  finalClientPath = portableClientPath;
+  console.log("Using portable frontend:", portableClientPath);
+} else if (import_fs3.default.existsSync(import_path3.default.join(devClientPath, "index.html"))) {
+  finalClientPath = devClientPath;
+  console.log("Using development frontend:", devClientPath);
+} else {
+  finalClientPath = portableClientPath;
+  console.warn("Warning: Frontend index.html not found in either path!");
+}
+app.use(import_express11.default.static(finalClientPath));
 app.get("*", (req, res) => {
   if (!req.path.startsWith("/api")) {
-    res.sendFile(import_path3.default.join(clientDistPath, "index.html"));
+    const indexPath = import_path3.default.join(finalClientPath, "index.html");
+    if (import_fs3.default.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(404).json({ ok: false, message: "Frontend not found. Please ensure index.html exists." });
+    }
   } else {
     res.status(404).json({ ok: false, message: "API endpoint not found" });
   }

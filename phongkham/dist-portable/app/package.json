@@ -1,22 +1,10 @@
 {
-  "name": "eye-clinic-server",
-  "version": "0.1.0",
+  "name": "phongkham-portable",
+  "version": "1.0.0",
   "type": "module",
-  "main": "dist-bundle/index.cjs",
-  "bin": "dist-bundle/index.cjs",
+  "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "prestart": "prisma db push --skip-generate",
-    "start": "node src/index.js",
-    "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push",
-    "db:migrate": "prisma migrate dev --name init",
-    "db:studio": "prisma studio",
-    "db:seed": "node src/scripts/seed.js",
-    "db:reset": "prisma db push --force-reset && node src/scripts/seed.js",
-    "backup": "node src/scripts/backup.js",
-    "prebuild": "node build.mjs",
-    "build": "pkg dist-bundle/index.cjs --target node20-win-x64 --output ../../dist/phongkham-server.exe --config pkg-config.json"
+    "start": "node src/index.js"
   },
   "dependencies": {
     "@prisma/client": "^5.19.1",
@@ -25,23 +13,10 @@
     "express": "^4.19.2",
     "mongoose": "^8.6.1",
     "morgan": "^1.10.0",
+    "react-to-print": "^3.2.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@yao-pkg/pkg": "^6.10.0",
-    "esbuild": "^0.21.5",
-    "nodemon": "^3.1.4",
     "prisma": "^5.19.1"
-  },
-  "pkg": {
-    "assets": [
-      "node_modules/@prisma/client/**/*",
-      "node_modules/.prisma/**/*",
-      "../client/dist/**/*",
-      "prisma/schema.prisma"
-    ],
-    "scripts": [
-      "src/**/*.js"
-    ]
   }
 }

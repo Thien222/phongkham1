@@ -22,20 +22,27 @@ model User {
 
 // Patient information
 model Patient {
-  id           String        @id @default(cuid())
-  code         String        @unique
-  fullName     String
-  phone        String?
-  gender       String?
-  birthDate    DateTime?
-  address      String?
-  visitPurpose String        @default("both") // examination | refraction | both | examination,refraction
-  visitStatus  String        @default("waiting") // waiting | in_progress | completed
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  refractions  Refraction[]
-  examinations Examination[]
-  invoices     Invoice[]
+  id              String        @id @default(cuid())
+  code            String        @unique
+  queueNumber     String?       // Mã số thứ tự (reset mỗi ngày)
+  fullName        String
+  phone           String?
+  gender          String?
+  birthDate       DateTime?
+  address         String?
+  visitPurpose    String        @default("both") // examination | refraction | both
+  visitStatus     String        @default("waiting") // waiting | in_progress | completed
+  // Thị lực ban đầu khi đến khám
+  initialVaOd     String?       // Thị lực mắt phải
+  initialVaOs     String?       // Thị lực mắt trái
+  hasGlasses      Boolean       @default(false) // Có đeo kính không
+  visitReason     String?       // Lý do đến khám
+  notes           String?       // Ghi chú
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  refractions     Refraction[]
+  examinations    Examination[]
+  invoices        Invoice[]
 }
 
 // Refraction examination results
@@ -43,19 +50,46 @@ model Refraction {
   id        String   @id @default(cuid())
   patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
   patientId String
-  // Right eye (OD - Oculus Dexter)
+  
+  // 1. Khúc xạ khách quan (Skiascopy) - không có VA
+  skiasOdSph     String?
+  skiasOdCyl     String?
+  skiasOdAxis    String?
+  skiasOsSph     String?
+  skiasOsCyl     String?
+  skiasOsAxis    String?
+  hasCycloplegia Boolean @default(false) // Liệt điều tiết
+  
+  // 2. Khúc xạ chủ quan (Subjective Refraction) - có VA
+  subjOdSph      String?
+  subjOdCyl      String?
+  subjOdAxis     String?
+  subjOdVa       String? // Visual Acuity
+  subjOsSph      String?
+  subjOsCyl      String?
+  subjOsAxis     String?
+  subjOsVa       String?
+  
+  // 3. Kính điều chỉnh (Prescription) - dùng để recommend
   odSph     String?
   odCyl     String?
   odAxis    String?
   odVa      String? // Visual Acuity
-  // Left eye (OS - Oculus Sinister)
   osSph     String?
   osCyl     String?
   osAxis    String?
   osVa      String?
+  
+  // Thông số bổ sung
+  odAdd     String? // Độ ADD mắt phải
+  osAdd     String? // Độ ADD mắt trái
+  pd        String? // Khoảng cách đồng tử (Pupillary Distance)
+  lensType  String? // Loại kính: da_trong | hai_trong | don_trong_xa | don_trong_gan
+  
   // Examination date and notes
   examDate  DateTime @default(now())
   notes     String?
+  signature String?  // Chữ ký bác sĩ (Base64)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -76,22 +110,26 @@ model Examination {
 
 // Product (glasses, lenses, medicines)
 model Product {
-  id          String        @id @default(cuid())
-  code        String        @unique
-  name        String
-  category    String        @default("glasses") // glasses | lenses | medicine
+  id           String        @id @default(cuid())
+  code         String        @unique
+  name         String
+  category     String        @default("glasses") // glasses | lenses | medicine
+  lensCategory String?       // Phân loại tròng: don_trong | hai_trong | da_trong
   manufacturer String?
-  sphRange    String?       // Spherical range
-  cylRange    String?       // Cylinder range
-  material    String?       // Material (AS, CR, etc.)
-  price       Int           @default(0)
-  quantity    Int           @default(0)
-  minStock    Int           @default(5)
-  expiresAt   DateTime?
-  imageUrl    String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  items       InvoiceItem[]
+  sphRange     String?       // Spherical range
+  cylRange     String?       // Cylinder range
+  addRange     String?       // ADD range (cho 2 tròng và đa tròng)
+  leftRegion   String?       // Miền bên trái (cho 2 tròng, đa tròng)
+  rightRegion  String?       // Miền bên phải (cho 2 tròng, đa tròng)
+  material     String?       // Material (AS, CR, etc.)
+  price        Int           @default(0)
+  quantity     Int           @default(0)
+  minStock     Int           @default(5)
+  expiresAt    DateTime?
+  imageUrl     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  items        InvoiceItem[]
 }
 
 // Invoice

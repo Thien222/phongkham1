@@ -1,345 +1,238 @@
 import { useState, useEffect } from 'react';
-import { Card, Select, Button, Input, Form, DatePicker, message, Row, Col, Table, Space, Modal, Tag } from 'antd';
-import { SearchOutlined, SaveOutlined, EyeOutlined, EditOutlined, DeleteOutlined, SwapOutlined } from '@ant-design/icons';
-import { fetchPatients, fetchExaminations, createExamination, updateExamination, deleteExamination } from '../lib/api';
-import api from '../lib/api';
-import dayjs from 'dayjs';
+import { Card, Button, message, Row, Col, Space, Tag, List, Typography, Modal, Divider } from 'antd';
+import { EyeOutlined, CheckOutlined, SwapOutlined, DeleteOutlined } from '@ant-design/icons';
+import { fetchPatients, updatePatient } from '../lib/api';
 
-const { TextArea } = Input;
+const { Title, Text } = Typography;
 
 export function ExaminationPage() {
-  const [patients, setPatients] = useState([]);
-  const [examinations, setExaminations] = useState([]);
+  const [waitingPatients, setWaitingPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [selectedExam, setSelectedExam] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [detailsVisible, setDetailsVisible] = useState(false);
-  const [form] = Form.useForm();
 
   useEffect(() => {
-    loadPatients();
-    loadExaminations();
+    loadWaitingPatients();
+    const interval = setInterval(loadWaitingPatients, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  const loadPatients = async (q = '') => {
+  const loadWaitingPatients = async () => {
     try {
-      // Chỉ lấy bệnh nhân có mục đích khám mắt hoặc cả hai
-      const data = await fetchPatients(q, 'examination', 'waiting');
-      setPatients(data);
+      const data = await fetchPatients('', 'examination', '');
+      const waiting = data.filter(p => p.visitStatus !== 'completed');
+      setWaitingPatients(waiting);
     } catch (error) {
       message.error('Không thể tải danh sách bệnh nhân');
     }
   };
 
-  const loadExaminations = async (patientId = null) => {
+  const handleComplete = async (patient) => {
     try {
-      setLoading(true);
-      const data = await fetchExaminations(patientId);
-      setExaminations(data);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePatientSelect = (value) => {
-    const patient = patients.find(p => p.id === value);
-    setSelectedPatient(patient);
-    loadExaminations(value);
-  };
-
-  const handleSubmit = async (values) => {
-    if (!selectedPatient) {
-      message.warning('Vui lòng chọn bệnh nhân');
-      return;
-    }
-
-    try {
-      const payload = {
-        patientId: selectedPatient.id,
-        symptoms: values.symptoms || null,
-        diagnosis: values.diagnosis || null,
-        treatment: values.treatment || null,
-        medications: values.medications || null,
-        examDate: values.examDate ? values.examDate.toISOString() : new Date().toISOString()
-      };
-
-      if (selectedExam) {
-        await updateExamination(selectedExam.id, payload);
-        message.success('Đã cập nhật phiếu khám bệnh');
-      } else {
-        await createExamination(payload);
-        message.success('Đã lưu phiếu khám bệnh');
-      }
-      
-      setSelectedExam(null);
-      form.resetFields(['symptoms', 'diagnosis', 'treatment', 'medications']);
-      loadExaminations(selectedPatient.id);
+      await updatePatient(patient.id, { visitStatus: 'completed' });
+      message.success('Đã hoàn thành khám');
+      setSelectedPatient(null);
+      loadWaitingPatients();
     } catch (error) {
-      message.error('Không thể lưu phiếu khám bệnh');
+      message.error('Không thể cập nhật trạng thái');
     }
   };
 
-  const handleEdit = (record) => {
-    setSelectedExam(record);
-    form.setFieldsValue({
-      symptoms: record.symptoms,
-      diagnosis: record.diagnosis,
-      treatment: record.treatment,
-      medications: record.medications,
-      examDate: dayjs(record.examDate)
-    });
-  };
-
-  const handleDelete = (id) => {
+  const handleTransferToRefraction = async (patient) => {
     Modal.confirm({
-      title: 'Xác nhận xóa',
-      content: 'Bạn có chắc chắn muốn xóa phiếu khám này?',
-      okText: 'Xóa',
-      cancelText: 'Hủy',
-      okButtonProps: { danger: true },
+      title: 'Chuyển sang khúc xạ',
+      content: `Chuyển bệnh nhân ${patient.fullName} sang phòng khúc xạ?`,
       onOk: async () => {
         try {
-          await deleteExamination(id);
-          message.success('Đã xóa phiếu khám');
-          loadExaminations(selectedPatient?.id);
+          // Add refraction to visit purpose
+          const currentPurpose = patient.visitPurpose;
+          let newPurpose = 'examination,refraction';
+          if (currentPurpose === 'both' || currentPurpose.includes('refraction')) {
+            newPurpose = currentPurpose;
+          }
+          
+          await updatePatient(patient.id, { 
+            visitPurpose: newPurpose,
+            visitStatus: 'waiting' 
+          });
+          message.success('Đã chuyển sang phòng khúc xạ');
+          loadWaitingPatients();
         } catch (error) {
-          message.error('Không thể xóa phiếu khám');
+          message.error('Không thể chuyển bệnh nhân');
         }
       }
     });
   };
 
-  const handleViewDetails = (record) => {
-    setSelectedExam(record);
-    setDetailsVisible(true);
-  };
-
-  const handleSwitchToRefraction = async () => {
-    if (!selectedPatient) {
-      message.warning('Vui lòng chọn bệnh nhân');
-      return;
-    }
-
-    try {
-      // Add "refraction" to visit purpose
-      await api.patch(`/patients/${selectedPatient.id}/visit-purpose`, {
-        addPurpose: 'refraction'
-      });
-      
-      message.success('Đã chuyển bệnh nhân sang Khúc xạ');
-      
-      // Navigate to Refraction page (or you can use React Router if available)
-      // For now, just show a message
-      Modal.info({
-        title: 'Chuyển sang Khúc xạ',
-        content: 'Bệnh nhân đã được thêm vào danh sách Khúc xạ. Vui lòng chuyển sang tab Khúc xạ để tiếp tục.',
-        onOk: () => {
-          // Reload patients to update the visitPurpose
-          loadPatients();
+  const handleDelete = async (patient) => {
+    Modal.confirm({
+      title: 'Xóa bệnh nhân',
+      content: `Bạn có chắc muốn xóa ${patient.fullName} khỏi danh sách?`,
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          await updatePatient(patient.id, { visitStatus: 'completed' });
+          message.success('Đã xóa khỏi danh sách');
+          loadWaitingPatients();
+        } catch (error) {
+          message.error('Không thể xóa bệnh nhân');
         }
-      });
-    } catch (error) {
-      console.error('Error switching to refraction:', error);
-      message.error('Không thể chuyển sang Khúc xạ');
-    }
+      }
+    });
   };
-
-  const columns = [
-    {
-      title: 'Ngày khám',
-      dataIndex: 'examDate',
-      key: 'examDate',
-      width: 150,
-      render: (text) => dayjs(text).format('DD/MM/YYYY HH:mm')
-    },
-    {
-      title: 'Bệnh nhân',
-      dataIndex: ['patient', 'fullName'],
-      key: 'patientName',
-    },
-    {
-      title: 'Triệu chứng',
-      dataIndex: 'symptoms',
-      key: 'symptoms',
-      ellipsis: true,
-      render: (text) => text || '-'
-    },
-    {
-      title: 'Chẩn đoán',
-      dataIndex: 'diagnosis',
-      key: 'diagnosis',
-      ellipsis: true,
-      render: (text) => text || '-'
-    },
-    {
-      title: 'Thao tác',
-      key: 'actions',
-      width: 150,
-      fixed: 'right',
-      render: (_, record) => (
-        <Space size="small">
-          <Button 
-            icon={<EyeOutlined />} 
-            size="small" 
-            onClick={() => handleViewDetails(record)}
-          />
-          <Button 
-            icon={<EditOutlined />} 
-            size="small" 
-            onClick={() => handleEdit(record)}
-          />
-          <Button 
-            icon={<DeleteOutlined />} 
-            size="small" 
-            danger 
-            onClick={() => handleDelete(record.id)}
-          />
-        </Space>
-      )
-    }
-  ];
 
   return (
     <div>
       <Row gutter={16}>
-        <Col span={10}>
-          <Card title={<h2 style={{ margin: 0 }}>Phiếu khám bệnh</h2>}>
-            <Form form={form} layout="vertical" onFinish={handleSubmit}>
-              <Form.Item label="Chọn bệnh nhân" required>
-                <Select
-                  showSearch
-                  placeholder="Tìm kiếm bệnh nhân..."
-                  optionFilterProp="children"
-                  onChange={handlePatientSelect}
-                  onSearch={(value) => loadPatients(value)}
-                  filterOption={false}
-                  suffixIcon={<SearchOutlined />}
-                  value={selectedPatient?.id}
+        {/* Left: Waiting list */}
+        <Col xs={24} lg={8}>
+          <Card
+            title={
+              <Space>
+                <EyeOutlined />
+                <span>Danh sách chờ khám</span>
+                <Tag color="blue">{waitingPatients.length}</Tag>
+              </Space>
+            }
+            headStyle={{ background: '#f0f5ff', borderBottom: '2px solid #1890ff' }}
+            bordered={false}
+          >
+            <List
+              dataSource={waitingPatients.slice(0, 10)}
+              pagination={false}
+              renderItem={(patient) => (
+                <Card
+                  key={patient.id}
+                  size="small"
+                  style={{ 
+                    marginBottom: 12,
+                    background: selectedPatient?.id === patient.id ? '#e6f7ff' : 'white',
+                    cursor: 'pointer',
+                    border: selectedPatient?.id === patient.id ? '2px solid #1890ff' : '1px solid #d9d9d9',
+                    transition: 'all 0.2s'
+                  }}
+                  onClick={() => setSelectedPatient(patient)}
                 >
-                  {patients.map(patient => (
-                    <Select.Option key={patient.id} value={patient.id}>
-                      {patient.fullName} ({patient.code})
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              {selectedPatient && (
-                <Card type="inner" style={{ marginBottom: 16, background: '#f5f5f5' }}>
-                  <p><strong>Mã BN:</strong> {selectedPatient.code}</p>
-                  <p><strong>SĐT:</strong> {selectedPatient.phone || '-'}</p>
-                  <p><strong>Giới tính:</strong> {selectedPatient.gender === 'male' ? 'Nam' : selectedPatient.gender === 'female' ? 'Nữ' : 'Khác'}</p>
-                  <Button 
-                    icon={<SwapOutlined />} 
-                    onClick={handleSwitchToRefraction}
-                    block
-                    style={{ marginTop: 8 }}
-                  >
-                    Chuyển sang Khúc xạ
-                  </Button>
+                  <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                    <Space>
+                      <Tag color="red" style={{ fontSize: '14px', fontWeight: 'bold', minWidth: '50px', textAlign: 'center' }}>
+                        {patient.queueNumber || '-'}
+                      </Tag>
+                      <Text strong style={{ fontSize: '14px' }}>{patient.fullName}</Text>
+                      <Tag color="blue">{patient.code}</Tag>
+                    </Space>
+                    
+                    <div style={{ marginTop: '8px' }}>
+                      <div style={{ marginBottom: '4px' }}>
+                        <Text type="secondary" style={{ fontSize: '12px' }}>SĐT: </Text>
+                        <Text style={{ fontSize: '12px' }}>{patient.phone || '-'}</Text>
+                      </div>
+                      <div style={{ marginBottom: '4px' }}>
+                        <Text type="secondary" style={{ fontSize: '12px' }}>Thị lực: </Text>
+                        <Text strong style={{ fontSize: '12px' }}>{patient.initialVaOd || '?'} / {patient.initialVaOs || '?'}</Text>
+                      </div>
+                      <div style={{ marginBottom: '4px' }}>
+                        <Text type="secondary" style={{ fontSize: '12px' }}>Có kính: </Text>
+                        <Text style={{ fontSize: '12px' }}>{patient.hasGlasses ? 'Có' : 'Không'}</Text>
+                      </div>
+                      {patient.visitReason && (
+                        <div style={{ marginBottom: '4px' }}>
+                          <Text type="secondary" style={{ fontSize: '11px' }}>Lý do: </Text>
+                          <Text italic style={{ fontSize: '11px' }}>{patient.visitReason}</Text>
+                        </div>
+                      )}
+                      <Tag color={patient.visitStatus === 'waiting' ? 'orange' : patient.visitStatus === 'in_progress' ? 'blue' : 'green'} style={{ fontSize: '11px', marginTop: '4px' }}>
+                        {patient.visitStatus === 'waiting' ? 'Chờ khám' : patient.visitStatus === 'in_progress' ? 'Đang khám' : 'Hoàn thành'}
+                      </Tag>
+                    </div>
+                  </Space>
                 </Card>
               )}
-
-              <Form.Item name="examDate" label="Ngày khám" initialValue={dayjs()}>
-                <DatePicker 
-                  showTime 
-                  format="DD/MM/YYYY HH:mm" 
-                  style={{ width: '100%' }} 
-                />
-              </Form.Item>
-
-              <Form.Item 
-                name="symptoms" 
-                label="Triệu chứng"
-                rules={[{ required: true, message: 'Vui lòng nhập triệu chứng' }]}
-              >
-                <TextArea rows={3} placeholder="Nhập triệu chứng..." />
-              </Form.Item>
-
-              <Form.Item 
-                name="diagnosis" 
-                label="Chẩn đoán"
-                rules={[{ required: true, message: 'Vui lòng nhập chẩn đoán' }]}
-              >
-                <TextArea rows={3} placeholder="Nhập chẩn đoán..." />
-              </Form.Item>
-
-              <Form.Item name="treatment" label="Điều trị">
-                <TextArea rows={3} placeholder="Nhập phương pháp điều trị..." />
-              </Form.Item>
-
-              <Form.Item name="medications" label="Thuốc kê đơn">
-                <TextArea rows={4} placeholder="Nhập danh sách thuốc và liều lượng..." />
-              </Form.Item>
-
-              <Form.Item>
-                <Space>
-                  <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>
-                    {selectedExam ? 'Cập nhật' : 'Lưu phiếu khám'}
-                  </Button>
-                  {selectedExam && (
-                    <Button onClick={() => {
-                      setSelectedExam(null);
-                      form.resetFields(['symptoms', 'diagnosis', 'treatment', 'medications']);
-                      form.setFieldsValue({ examDate: dayjs() });
-                    }}>
-                      Hủy chỉnh sửa
-                    </Button>
-                  )}
-                </Space>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-
-        <Col span={14}>
-          <Card title={<h2 style={{ margin: 0 }}>Lịch sử khám bệnh</h2>}>
-            <Table
-              columns={columns}
-              dataSource={examinations}
-              loading={loading}
-              rowKey="id"
-              pagination={{ pageSize: 10 }}
-              scroll={{ x: 800 }}
+              locale={{ emptyText: <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>Không có bệnh nhân chờ khám</div> }}
             />
           </Card>
         </Col>
-      </Row>
 
-      <Modal
-        title="Chi tiết phiếu khám"
-        open={detailsVisible}
-        onCancel={() => {
-          setDetailsVisible(false);
-          setSelectedExam(null);
-        }}
-        footer={[
-          <Button key="close" onClick={() => {
-            setDetailsVisible(false);
-            setSelectedExam(null);
-          }}>
-            Đóng
-          </Button>
-        ]}
-        width={600}
-      >
-        {selectedExam && (
-          <div style={{ lineHeight: 2.2 }}>
-            <p><strong>Ngày khám:</strong> {dayjs(selectedExam.examDate).format('DD/MM/YYYY HH:mm')}</p>
-            <p><strong>Bệnh nhân:</strong> {selectedExam.patient?.fullName}</p>
-            <p><strong>Mã BN:</strong> {selectedExam.patient?.code}</p>
-            <hr />
-            <p><strong>Triệu chứng:</strong></p>
-            <p style={{ whiteSpace: 'pre-wrap', marginLeft: 20 }}>{selectedExam.symptoms || '-'}</p>
-            <p><strong>Chẩn đoán:</strong></p>
-            <p style={{ whiteSpace: 'pre-wrap', marginLeft: 20 }}>{selectedExam.diagnosis || '-'}</p>
-            <p><strong>Điều trị:</strong></p>
-            <p style={{ whiteSpace: 'pre-wrap', marginLeft: 20 }}>{selectedExam.treatment || '-'}</p>
-            <p><strong>Thuốc kê đơn:</strong></p>
-            <p style={{ whiteSpace: 'pre-wrap', marginLeft: 20 }}>{selectedExam.medications || '-'}</p>
-          </div>
-        )}
-      </Modal>
+        {/* Right: Patient details */}
+        <Col xs={24} lg={16}>
+          {selectedPatient ? (
+            <Card
+              title={
+                <Space>
+                  <EyeOutlined style={{ fontSize: '20px', color: '#1890ff' }} />
+                  <span style={{ fontSize: '18px', fontWeight: 'bold' }}>Thông tin bệnh nhân</span>
+                  <Divider type="vertical" />
+                  <Text strong style={{ fontSize: '16px' }}>{selectedPatient.fullName}</Text>
+                  <Tag color="blue">{selectedPatient.code}</Tag>
+                  <Tag color="red" style={{ fontSize: '14px', fontWeight: 'bold' }}>{selectedPatient.queueNumber}</Tag>
+                </Space>
+              }
+              headStyle={{ background: '#f0f5ff', borderBottom: '2px solid #1890ff' }}
+              extra={
+                <Space>
+                  <Button
+                    icon={<CheckOutlined />}
+                    type="primary"
+                    size="large"
+                    onClick={() => handleComplete(selectedPatient)}
+                    style={{ height: '40px', fontSize: '16px', padding: '0 24px' }}
+                  >
+                    Hoàn thành
+                  </Button>
+                  <Button
+                    icon={<SwapOutlined />}
+                    size="large"
+                    onClick={() => handleTransferToRefraction(selectedPatient)}
+                    style={{ height: '40px', fontSize: '16px', padding: '0 24px' }}
+                  >
+                    Chuyển khúc xạ
+                  </Button>
+                  <Button
+                    icon={<DeleteOutlined />}
+                    danger
+                    size="large"
+                    onClick={() => handleDelete(selectedPatient)}
+                    style={{ height: '40px', fontSize: '16px', padding: '0 24px' }}
+                  >
+                    Xóa
+                  </Button>
+                </Space>
+              }
+            >
+              <Card size="small" style={{ marginBottom: 16, background: '#f9f9f9' }}>
+                <Row gutter={24}>
+                  <Col span={8}>
+                    <Text strong>Số điện thoại: </Text>
+                    <Text>{selectedPatient.phone || '-'}</Text>
+                  </Col>
+                  <Col span={8}>
+                    <Text strong>Thị lực: </Text>
+                    <Text strong>{selectedPatient.initialVaOd || '?'} / {selectedPatient.initialVaOs || '?'}</Text>
+                  </Col>
+                  <Col span={8}>
+                    <Text strong>Có kính: </Text>
+                    <Text>{selectedPatient.hasGlasses ? 'Có' : 'Không'}</Text>
+                  </Col>
+                  {selectedPatient.visitReason && (
+                    <Col span={24} style={{ marginTop: 12 }}>
+                      <Text strong>Lý do khám: </Text>
+                      <Text italic>{selectedPatient.visitReason}</Text>
+                    </Col>
+                  )}
+                </Row>
+              </Card>
+              <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+                <Text type="secondary">Chức năng khám bệnh đang được phát triển...</Text>
+              </div>
+            </Card>
+          ) : (
+            <Card>
+              <div style={{ textAlign: 'center', padding: '60px 20px', color: '#999' }}>
+                <EyeOutlined style={{ fontSize: 48, marginBottom: 16 }} />
+                <Title level={4}>Chọn bệnh nhân từ danh sách bên trái để bắt đầu khám</Title>
+              </div>
+            </Card>
+          )}
+        </Col>
+      </Row>
     </div>
   );
 }

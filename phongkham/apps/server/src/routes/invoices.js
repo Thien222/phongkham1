@@ -120,6 +120,12 @@ router.post('/', async (req, res, next) => {
       });
     }
     
+    // Update patient status to "completed" when invoice is created
+    await prisma.patient.update({
+      where: { id: patientId },
+      data: { visitStatus: 'completed' }
+    });
+    
     res.status(201).json(created);
   } catch (err) {
     next(err);

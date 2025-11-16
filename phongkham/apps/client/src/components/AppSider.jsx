@@ -6,6 +6,7 @@ import {
   SolutionOutlined,
   FileTextOutlined,
   DatabaseOutlined,
+  HistoryOutlined,
   BarChartOutlined,
   WarningOutlined,
   SettingOutlined
@@ -22,6 +23,7 @@ const allItems = [
   { key: '/examination', icon: <SolutionOutlined />, label: <Link to="/examination">Khám bệnh</Link>, role: 'user' },
   { key: '/invoices', icon: <FileTextOutlined />, label: <Link to="/invoices">Hóa đơn</Link>, role: 'user' },
   { key: '/inventory', icon: <DatabaseOutlined />, label: <Link to="/inventory">Kho hàng</Link>, role: 'admin' },
+  { key: '/history', icon: <HistoryOutlined />, label: <Link to="/history">Lịch sử</Link>, role: 'user' },
   { key: '/reports', icon: <BarChartOutlined />, label: <Link to="/reports">Thống kê</Link>, role: 'admin' },
   { key: '/incidents', icon: <WarningOutlined />, label: <Link to="/incidents">Sự cố</Link>, role: 'user' },
   { key: '/settings', icon: <SettingOutlined />, label: <Link to="/settings">Cài đặt</Link>, role: 'admin' }

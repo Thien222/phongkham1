@@ -30,7 +30,28 @@ router.get('/dashboard', async (req, res, next) => {
       }
     });
     
-    // Revenue this month
+    // Examinations today
+    const examinationsToday = await prisma.examination.count({
+      where: {
+        createdAt: {
+          gte: today,
+          lt: tomorrow
+        }
+      }
+    });
+    
+    // Invoices today (glasses only)
+    const invoicesToday = await prisma.invoice.count({
+      where: {
+        type: 'glasses',
+        createdAt: {
+          gte: today,
+          lt: tomorrow
+        }
+      }
+    });
+    
+    // Revenue this month (hidden, but kept for compatibility)
     const invoicesThisMonth = await prisma.invoice.findMany({
       where: {
         status: 'PAID',
@@ -60,6 +81,8 @@ router.get('/dashboard', async (req, res, next) => {
       totalPatients,
       totalProducts,
       refractionsToday,
+      examinationsToday,
+      invoicesToday,
       revenueThisMonth,
       recentPatients,
       recentRefractions

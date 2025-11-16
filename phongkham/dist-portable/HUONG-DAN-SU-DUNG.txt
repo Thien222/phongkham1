@@ -1,189 +1,125 @@
-╔═══════════════════════════════════════════════════════════════════╗
-║   HỆ THỐNG QUẢN LÝ PHÒNG KHÁM MẮT - HƯỚNG DẪN SỬ DỤNG           ║
-╚═══════════════════════════════════════════════════════════════════╝
+=============================================
+  HƯỚNG DẪN SỬ DỤNG - PHÒNG KHÁM MẮT
+=============================================
 
-📦 CÁC FILE TRONG PACKAGE:
-├── START.bat                # 🚀 CLICK ĐÚP FILE NÀY ĐỂ CHẠY!
-├── nodejs/
-│   └── node.exe            # Node.js runtime (không cần cài)
-├── app/                     # Mã nguồn ứng dụng
-├── data/                    # Thư mục chứa database
-│   └── dev.db              # File database SQLite
-├── backups/                 # Thư mục lưu backup tự động
-└── HUONG-DAN-SU-DUNG.txt   # File này
+PHIÊN BẢN PORTABLE - Chạy 1 file BAT duy nhất
 
-═══════════════════════════════════════════════════════════════════
+=============================================
+CÁC TÍNH NĂNG MỚI
+=============================================
 
-🚀 HƯỚNG DẪN CHẠY ỨNG DỤNG
+1. TIẾP TÂN:
+   - Thêm bệnh nhân với thị lực ban đầu (mắt phải/trái)
+   - Checkbox "Có đeo kính"
+   - Lý do đến khám
+   - Ghi chú
+   - Mã số thứ tự tự động (STT001, STT002, ...) - Reset mỗi ngày
 
-▶ BƯỚC 1: CHẠY TRÊN MÁY SERVER (Máy chính)
+2. KHÚC XẠ:
+   - 3 loại khúc xạ:
+     + Khúc xạ khách quan (Skiascopy)
+     + Khúc xạ chủ quan (Subjective)
+     + Kính điều chỉnh (Prescription)
+   - Thêm độ ADD (cho kính đa tròng)
+   - Khoảng cách đồng tử (PD)
+   - Loại kính: Đa tròng/2 tròng/Đơn tròng
 
-1. Giải nén toàn bộ package vào thư mục bất kỳ
-   (VD: C:\PhongKham hoặc D:\PhongKham)
+3. KHO HÀNG:
+   - Phân loại tròng kính: Đơn tròng/2 tròng/Đa tròng
+   - Filter theo loại tròng
+   - Độ ADD cho tròng đặc biệt
 
-2. Click đúp vào file: START.bat
-   
-   📌 LƯU Ý:
-   - Một cửa sổ terminal (màn hình đen) sẽ hiện lên
-   - KHÔNG ĐÓNG cửa sổ này! Đây là server đang chạy
-   - Đợi 5-10 giây để server khởi động hoàn tất
+4. DASHBOARD:
+   - Hiển thị số lượng bệnh nhân (không hiển thị doanh thu)
+   - Bệnh nhân khúc xạ hôm nay
+   - Khám bệnh hôm nay
+   - Hóa đơn kính hôm nay
 
-3. Khi thấy dòng: "Server listening on http://localhost:4000"
-   → ✅ Server đã sẵn sàng!
+=============================================
+CÁCH CHẠY PHẦN MỀM
+=============================================
 
-4. Mở trình duyệt (Chrome, Edge, Firefox...)
-   Gõ vào thanh địa chỉ: http://localhost:4000
-   
-   → Nếu thấy giao diện phòng khám → THÀNH CÔNG! 🎉
+1. Double-click vào file "START.bat"
+2. Chờ server khởi động (cửa sổ đen xuất hiện)
+3. Mở trình duyệt và truy cập: http://localhost:4000
+4. Đăng nhập (nếu cần)
 
-═══════════════════════════════════════════════════════════════════
+LƯU Ý:
+- KHÔNG TẮT cửa sổ đen (đó là server đang chạy)
+- Để tắt phần mềm: Đóng cửa sổ đen hoặc nhấn Ctrl+C
 
-▶ BƯỚC 2: KẾT NỐI CÁC MÁY PHỤ (Tiếp tân, khám bệnh...)
+=============================================
+CẤU TRÚC THƯ MỤC
+=============================================
 
-1. Kiểm tra địa chỉ IP của máy server:
-   - Trên máy server, mở Command Prompt (cmd)
-   - Gõ: ipconfig
-   - Tìm dòng "IPv4 Address": VD: 192.168.1.100
+dist-portable/
+├── START.bat              ← File chạy chính
+├── nodejs/                ← Node.js runtime
+│   └── node.exe
+├── data/                  ← Database (tự động tạo)
+│   └── dev.db
+└── app/                   ← Mã nguồn
+    ├── client-dist/       ← Giao diện web
+    ├── src/               ← Server code
+    ├── prisma/            ← Database schema
+    └── node_modules/      ← Dependencies
 
-2. Trên các máy phụ:
-   - Mở trình duyệt
-   - Gõ: http://192.168.1.100:4000
-     (Thay 192.168.1.100 bằng IP thực tế của máy server)
+=============================================
+BACKUP DỮ LIỆU
+=============================================
 
-3. Bookmark (Ctrl+D) để lưu lại, lần sau không cần gõ
+Database được lưu tại: dist-portable/data/dev.db
 
-4. Đảm bảo:
-   ✓ Tất cả máy cùng mạng WiFi/LAN
-   ✓ Firewall không chặn port 4000
-   ✓ Máy server luôn chạy START.bat
+Để backup:
+1. Copy file "data/dev.db" ra nơi khác
+2. Giữ file backup này an toàn
 
-═══════════════════════════════════════════════════════════════════
+Để restore:
+1. Tắt phần mềm (đóng cửa sổ đen)
+2. Thay thế file "data/dev.db" bằng file backup
+3. Chạy lại START.bat
 
-🔐 TÀI KHOẢN MẶC ĐỊNH
+=============================================
+XỬ LÝ LỖI
+=============================================
 
-┌─────────────────────────────────────────────────────────────────┐
-│ 👤 Tài khoản Admin (mặc định):                                  │
-│                                                                  │
-│    Username: admin                                              │
-│    Password: admin123                                           │
-│                                                                  │
-│ ⚠️  QUAN TRỌNG:                                                 │
-│    Hãy đổi mật khẩu ngay sau lần đăng nhập đầu tiên!           │
-│    Vào: Cài đặt → Đổi mật khẩu Admin                           │
-└─────────────────────────────────────────────────────────────────┘
+LỖI: "Cannot find module..."
+→ Giải pháp: Xóa thư mục "app/node_modules" và chạy lại START.bat
 
-═══════════════════════════════════════════════════════════════════
+LỖI: "Port 4000 đã được sử dụng"
+→ Giải pháp: Tắt các ứng dụng khác đang dùng port 4000
 
-💾 SAO LƯU DỮ LIỆU (BACKUP)
+LỖI: "Database locked"
+→ Giải pháp: Đóng tất cả cửa sổ phần mềm và chạy lại
 
-▸ Tự động:
-  - Hệ thống tự động backup mỗi 4 giờ
-  - File backup lưu trong folder: backups/
-  - Tên file: backup-YYYYMMDD-HHMMSS.db
+LỖI: "The table does not exist in the current database"
+→ Giải pháp: 
+   1. Tắt server (đóng cửa sổ đen)
+   2. Chạy file "RESET-DB.bat" để tạo lại database
+   3. Hoặc chạy "MIGRATE.bat" để cập nhật schema
 
-▸ Thủ công:
-  - Đăng nhập Admin → Cài đặt → Backup & Phục hồi
-  - Click "Tạo Backup Ngay"
+LỖI: "Không thấy dữ liệu nào"
+→ Giải pháp:
+   1. Tắt server
+   2. Chạy "RESET-DB.bat" để reset và seed dữ liệu mẫu
+   3. Chạy lại START.bat
 
-▸ Khôi phục dữ liệu:
-  - Vào Cài đặt → Backup & Phục hồi
-  - Chọn file backup muốn khôi phục
-  - Click "Khôi phục"
+=============================================
+HỖ TRỢ KỸ THUẬT
+=============================================
 
-⚠️  CỰC KỲ QUAN TRỌNG:
-    Nên copy folder backups/ ra USB hoặc ổ đĩa khác HÀNG TUẦN
-    để tránh mất dữ liệu khi máy hỏng!
+Nếu gặp vấn đề, kiểm tra:
+1. File log trong thư mục "data/"
+2. Cửa sổ đen (terminal) có thông báo lỗi gì không
+3. Trình duyệt Console (F12) có lỗi gì không
 
-═══════════════════════════════════════════════════════════════════
+=============================================
+PHIÊN BẢN
+=============================================
 
-🔧 CÀI ĐẶT NÂNG CAO
+Version: 2.0.0
+Build date: 2025-01-15
+Database: SQLite
+Schema version: Latest (với các trường mới)
 
-▸ Thay đổi cổng (Port):
-  1. Mở file app\.env bằng Notepad
-  2. Đổi dòng: PORT=4000 thành PORT=8080 (hoặc số khác)
-  3. Lưu lại và khởi động lại START.bat
-
-▸ Đường dẫn backup tùy chỉnh:
-  - Vào Cài đặt → Backup & Phục hồi
-  - Nhập đường dẫn: VD: D:\BackupPhongKham
-  - Khuyến khích để ổ đĩa khác để an toàn hơn
-
-═══════════════════════════════════════════════════════════════════
-
-📝 CÁC TÍNH NĂNG CHÍNH
-
-┌─────────────────────────────────────────────────────────────────┐
-│ ✓ Dashboard          - Tổng quan hệ thống, thống kê nhanh       │
-│ ✓ Tiếp tân           - Đăng ký bệnh nhân mới, tìm kiếm          │
-│ ✓ Khúc xạ            - Đo mắt, kê đơn kính (tròng + gọng)       │
-│ ✓ Khám bệnh          - Chẩn đoán, kê đơn thuốc                  │
-│ ✓ Hóa đơn            - Tạo, in, thanh toán hóa đơn              │
-│ ✓ Kho hàng (Admin)   - Quản lý sản phẩm, tồn kho               │
-│ ✓ Thống kê (Admin)   - Báo cáo doanh thu, sản phẩm bán chạy    │
-│ ✓ Cài đặt (Admin)    - Cấu hình hệ thống, backup, đổi MK       │
-└─────────────────────────────────────────────────────────────────┘
-
-═══════════════════════════════════════════════════════════════════
-
-❓ KHẮC PHỤC SỰ CỐ
-
-▸ Không chạy được START.bat:
-  ✓ Click chuột phải START.bat → "Run as Administrator"
-  ✓ Tạm tắt phần mềm diệt virus
-  ✓ Kiểm tra Windows Defender có chặn không
-
-▸ Lỗi "Cannot find module":
-  ✓ Tắt START.bat
-  ✓ Xóa folder app\node_modules
-  ✓ Xóa folder app\.prisma (nếu có)
-  ✓ Chạy lại START.bat
-
-▸ Máy phụ không kết nối được:
-  ✓ Kiểm tra cùng mạng WiFi/LAN
-  ✓ Tắt Firewall tạm thời để test
-  ✓ Ping thử IP máy server: ping 192.168.X.X
-  ✓ Kiểm tra máy server có chạy START.bat không
-
-▸ Dữ liệu bị lỗi:
-  ✓ Khôi phục từ backup trong folder backups/
-  ✓ Hoặc copy file dev.db cũ vào folder data/
-
-▸ Quên mật khẩu admin:
-  ✓ Tắt START.bat
-  ✓ Xóa file data\dev.db
-  ✓ Copy file dev.db gốc (từ lúc cài đặt) vào data/
-  ✓ Chạy lại START.bat
-  ✓ Username/Password về mặc định: admin/admin123
-
-▸ Server chạy chậm:
-  ✓ Restart START.bat hàng ngày
-  ✓ Dọn dẹp backup cũ trong folder backups/
-  ✓ Kiểm tra dung lượng ổ đĩa
-
-═══════════════════════════════════════════════════════════════════
-
-💡 MẸO SỬ DỤNG
-
-✓ Nên để máy server ở vị trí an toàn, ít di chuyển
-✓ Backup dữ liệu ra USB/ổ cứng ngoài mỗi tuần
-✓ Không tắt cửa sổ START.bat khi đang làm việc
-✓ Nếu cần tắt máy server, đóng cửa sổ START.bat trước
-✓ Kiểm tra kết nối mạng thường xuyên
-✓ Đổi mật khẩu admin định kỳ (3-6 tháng)
-
-═══════════════════════════════════════════════════════════════════
-
-📞 HỖ TRỢ KỸ THUẬT
-
-Nếu gặp vấn đề không giải quyết được, vui lòng liên hệ:
-
-• GitHub: https://github.com/Thien222/phongkham1
-• Email: thien222@users.noreply.github.com
-
-═══════════════════════════════════════════════════════════════════
-
-🎉 Chúc bạn sử dụng hệ thống hiệu quả!
-
-Phiên bản: 1.0.0 (Portable Edition)
-Cập nhật: 30/10/2025
-
+=============================================
