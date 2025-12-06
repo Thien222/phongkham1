@@ -38,8 +38,8 @@ router.get('/:id', async (req, res, next) => {
 // Create refraction
 router.post('/', async (req, res, next) => {
   try {
-    const { 
-      patientId, 
+    const {
+      patientId,
       // Skiascopy (khúc xạ khách quan)
       skiasOdSph, skiasOdCyl, skiasOdAxis,
       skiasOsSph, skiasOsCyl, skiasOsAxis,
@@ -48,13 +48,13 @@ router.post('/', async (req, res, next) => {
       subjOdSph, subjOdCyl, subjOdAxis, subjOdVa,
       subjOsSph, subjOsCyl, subjOsAxis, subjOsVa,
       // Prescription (kính điều chỉnh)
-      odSph, odCyl, odAxis, odVa, 
+      odSph, odCyl, odAxis, odVa,
       osSph, osCyl, osAxis, osVa,
       // Additional fields
       odAdd, osAdd, pd, lensType,
-      examDate, notes, signature
+      examDate, notes
     } = req.body ?? {};
-    
+
     const created = await prisma.refraction.create({
       data: {
         patientId,
@@ -90,8 +90,7 @@ router.post('/', async (req, res, next) => {
         pd: pd ?? null,
         lensType: lensType ?? null,
         examDate: examDate ? new Date(examDate) : new Date(),
-        notes: notes ?? null,
-        signature: signature ?? null
+        notes: notes ?? null
       },
       include: { patient: true }
     });
@@ -104,7 +103,7 @@ router.post('/', async (req, res, next) => {
 // Update refraction
 router.put('/:id', async (req, res, next) => {
   try {
-    const { 
+    const {
       // Skiascopy
       skiasOdSph, skiasOdCyl, skiasOdAxis,
       skiasOsSph, skiasOsCyl, skiasOsAxis,
@@ -113,15 +112,15 @@ router.put('/:id', async (req, res, next) => {
       subjOdSph, subjOdCyl, subjOdAxis, subjOdVa,
       subjOsSph, subjOsCyl, subjOsAxis, subjOsVa,
       // Prescription
-      odSph, odCyl, odAxis, odVa, 
+      odSph, odCyl, odAxis, odVa,
       osSph, osCyl, osAxis, osVa,
       // Additional
       odAdd, osAdd, pd, lensType,
-      examDate, notes, signature
+      examDate, notes
     } = req.body ?? {};
-    
+
     const updateData = {};
-    
+
     // Skiascopy
     if (skiasOdSph !== undefined) updateData.skiasOdSph = skiasOdSph;
     if (skiasOdCyl !== undefined) updateData.skiasOdCyl = skiasOdCyl;
@@ -130,7 +129,7 @@ router.put('/:id', async (req, res, next) => {
     if (skiasOsCyl !== undefined) updateData.skiasOsCyl = skiasOsCyl;
     if (skiasOsAxis !== undefined) updateData.skiasOsAxis = skiasOsAxis;
     if (hasCycloplegia !== undefined) updateData.hasCycloplegia = hasCycloplegia;
-    
+
     // Subjective
     if (subjOdSph !== undefined) updateData.subjOdSph = subjOdSph;
     if (subjOdCyl !== undefined) updateData.subjOdCyl = subjOdCyl;
@@ -140,7 +139,7 @@ router.put('/:id', async (req, res, next) => {
     if (subjOsCyl !== undefined) updateData.subjOsCyl = subjOsCyl;
     if (subjOsAxis !== undefined) updateData.subjOsAxis = subjOsAxis;
     if (subjOsVa !== undefined) updateData.subjOsVa = subjOsVa;
-    
+
     // Prescription
     if (odSph !== undefined) updateData.odSph = odSph;
     if (odCyl !== undefined) updateData.odCyl = odCyl;
@@ -150,7 +149,7 @@ router.put('/:id', async (req, res, next) => {
     if (osCyl !== undefined) updateData.osCyl = osCyl;
     if (osAxis !== undefined) updateData.osAxis = osAxis;
     if (osVa !== undefined) updateData.osVa = osVa;
-    
+
     // Additional
     if (odAdd !== undefined) updateData.odAdd = odAdd;
     if (osAdd !== undefined) updateData.osAdd = osAdd;
@@ -158,8 +157,7 @@ router.put('/:id', async (req, res, next) => {
     if (lensType !== undefined) updateData.lensType = lensType;
     if (examDate !== undefined) updateData.examDate = examDate ? new Date(examDate) : null;
     if (notes !== undefined) updateData.notes = notes;
-    if (signature !== undefined) updateData.signature = signature;
-    
+
     const updated = await prisma.refraction.update({
       where: { id: req.params.id },
       data: updateData,

@@ -30,8 +30,10 @@ model Patient {
   gender          String?
   birthDate       DateTime?
   address         String?
-  visitPurpose    String        @default("both") // examination | refraction | both
-  visitStatus     String        @default("waiting") // waiting | in_progress | completed
+  visitPurpose        String        @default("both") // examination | refraction | both
+  visitStatus         String        @default("waiting") // waiting | in_progress | completed (legacy)
+  examinationStatus   String        @default("waiting") // waiting | in_progress | completed
+  refractionStatus    String        @default("waiting") // waiting | in_progress | completed
   // Thị lực ban đầu khi đến khám
   initialVaOd     String?       // Thị lực mắt phải
   initialVaOs     String?       // Thị lực mắt trái
@@ -89,7 +91,6 @@ model Refraction {
   // Examination date and notes
   examDate  DateTime @default(now())
   notes     String?
-  signature String?  // Chữ ký bác sĩ (Base64)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -149,7 +150,6 @@ model Invoice {
   serviceFee     Int           @default(0) // Phí dịch vụ
   tax            Int           @default(0)
   total          Int           @default(0)
-  signature      String?       // Base64 signature
   notes          String?       // Ghi chú
   instructions   String?       // Hướng dẫn sử dụng
   dosage         String?       // Liều lượng (cho thuốc)
